@@ -2,6 +2,7 @@ import flask
 from flask_cors import CORS, cross_origin
 from flask_session import Session
 from werkzeug.serving import make_server
+import secrets
 
 import webbrowser
 
@@ -30,17 +31,17 @@ class TorchBoardServer():
         self.host = host
         self.static_path = static_path        
         
+        self.board = board
         self.variable_state = dict()
         
         self.app = flask.Flask(name)
         self.__flask_process = None
         
-        self.app.config["SECRET_KEY"] = "duparomana123" #TODO: Change secret key
+        self.app.config["SECRET_KEY"] = secrets.token_urlsafe(16)
         self.app.config['SESSION_TYPE'] = 'filesystem'
         
         CORS(self.app, resources={r"/*": {"origins": "*"}}) #TODO: Change origins to specific domain
         Session(self.app)
-        self.board = board
 
         @self.app.route('/')
         def index():
@@ -54,6 +55,7 @@ class TorchBoardServer():
         self.app.add_url_rule('/get_history','get_history', self.__get_history, methods=['GET'])
         self.app.add_url_rule('/get_variables','get_variables', self.__get_variables, methods=['GET'])
         self.app.add_url_rule('/update_variable','update_variable', self.__update_variable, methods=['PUT'])
+        self.app.add_url_rule('/do_action','do_action', self.__do_action, methods=['POST'])
         
         self.server = make_server(self.host, self.port, self.app, threaded=True)
         self.server.daemon_threads = True
@@ -103,7 +105,24 @@ class TorchBoardServer():
             
         self.update_changeable_value(name, value)
         return flask.jsonify({'status': 'success'}),200
+    
+    @cross_origin()
+    def __do_action(self) -> None:
+        data = flask.request.json
+        if any([key not in data for key in ['action']]):
+            return flask.jsonify({'status': 'error', 'message': 'Invalid request'}),400
         
+        action = data['action']
+        match action:
+            case 'toggle_training':
+                self.board.toggle_training()
+                return flask.jsonify({'status': 'success'}),200
+            case 'save_model':
+                self.board.save_model()
+                return flask.jsonify({'status': 'success'}),200
+            case _:
+                return flask.jsonify({'status': 'error', 'message': 'Invalid action'}),400
+    
     def register_changeable_value(self,name:str,default_value:Any) -> None:
         self.variable_state[name] = default_value
         

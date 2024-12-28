@@ -20,6 +20,8 @@ class Board:
         
         self.server = TorchBoardServer(board=self)
         self.server.start()
+        
+        self.do_training = True
 
     def update(self, **kwargs):
         """ Update arguments """
@@ -27,16 +29,22 @@ class Board:
         
         listener_changes = {arg_name: float(kwargs[arg_name])
                    for arg_name, arg_type in parsed.items() if arg_type in ['Value']}
+        
         self.history.update(listener_changes)
         
-        for k,v in self.server.get_changeable_values().items():
-            if k.startswith('optim_'):
-                old_v = self.operators["Optimizer"].get_parameter_value(k[6:])
-                if old_v != v:
-                    self.operators['Optimizer'].update_parameters(k[6:], v)
-                    print(self.operators["Optimizer"].get_parameter_value(k[6:]))
-                
+        while not self.do_training:
+            pass #Is this the best way to do this?        
         
+    def update_variable(self, name: str, value: Any):
+        if name.startswith('optim_'):
+            self.operators['Optimizer'].update_parameters(name[6:], value)
+        #TODO update other variables
+    
+    def toggle_training(self):
+        self.do_training = not self.do_training
+        
+    def save_model(self):
+        torch.save(self.model, 'model.pth')
 
     def _argument_parser(self, kwargs: Dict[str, Any]) -> Dict[str, _SUPPORTED]:
         parsed: Dict[str, _SUPPORTED] = {arg_name: Board._match_argument(
@@ -47,8 +55,8 @@ class Board:
             optim = reverse_parsing['Optimizer']
             optim_operator = OptimizerOperator.get_optimizer(optim)
             
-            for k,v in optim_operator.get_parameters().items():
-                optim_value = optim.param_groups[0][k]
+            for k in optim_operator.get_parameters().keys():
+                optim_value = optim.param_groups[0][k] #grab set value from optimizer
                 self.server.register_changeable_value(f"optim_{k}", optim_value)
             
             self.operators['Optimizer'] = optim_operator
