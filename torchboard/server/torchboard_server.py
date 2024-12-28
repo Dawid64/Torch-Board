@@ -107,7 +107,7 @@ class TorchBoardServer():
     @cross_origin()
     def __get_variables(self) -> flask.Response:
         variables = [{'name':key,'value':value,'type':type_mapping(value)}
-         for key, value in self.variable_state.items()]
+         for key, value in self.board.optim_operator.get_current_parameters().items()]
         return flask.jsonify(variables),200
     
     @cross_origin()
@@ -118,8 +118,8 @@ class TorchBoardServer():
             
         name,value = data['name'],data['value']
         
-        if not name in self.variable_state:
-            return flask.jsonify({'status': 'error', 'message': f'Variable {name} not found'}),404
+        # if not name in self.variable_state:
+        #     return flask.jsonify({'status': 'error', 'message': f'Variable {name} not found'}),404
         
         self.board.optim_operator.update_parameters(name, value)
         
