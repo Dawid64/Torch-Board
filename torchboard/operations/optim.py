@@ -8,7 +8,10 @@ class OptimizerOperator:
         self.parameters: Set[str] = set()
 
     def get_parameters(self) -> Dict[str, type]:
-        pass
+        raise NotImplementedError("Optimizer not selected")
+    
+    def get_current_parameters(self) -> Dict[str, Any]:
+        return {parameter: getattr(self.optim, parameter) for parameter in self.parameters}
 
     def update_parameters(self, parameter: str, value: Any):
         assert parameter in self.parameters, f"Parameter {
