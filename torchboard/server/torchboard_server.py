@@ -27,11 +27,12 @@ class TorchBoardServer():
     app:flask.Flask
     
     def __init__(self, port:int=8080, host:str='127.0.0.1', name:str='TorchBoard', static_path:str='static', board:Any=None) -> None:
+        from torchboard.base.board import Board
         self.port = port
         self.host = host
         self.static_path = static_path        
         
-        self.board = board
+        self.board: Board = board
         self.variable_state = dict()
         
         self.app = flask.Flask(name)
@@ -94,15 +95,16 @@ class TorchBoardServer():
     @cross_origin()
     def __update_variable(self) -> flask.Response:
         data = flask.request.json
-        if any([key not in data for key in ['name','value']]):
+        if 'name' not in data or 'value' not in data:
             return flask.jsonify({'status': 'error', 'message': 'Invalid request'}),400
             
-        name,value = data['name'],data['value']
+        name, value = data['name'], data['value']
         
         if not name in self.variable_state:
             return flask.jsonify({'status': 'error', 'message': f'Variable {name} not found'}),404
-            
-        self.board.update_variable(name, value)
+        
+        self.board.optim_operator.update_parameters(name, value)
+        
         return flask.jsonify({'status': 'success'}),200
     
     @cross_origin()

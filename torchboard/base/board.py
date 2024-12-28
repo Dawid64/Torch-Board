@@ -16,7 +16,7 @@ class Board:
         self.model: Optional[Module]
         self.optim: Optional[Optimizer]
         self.history: History = History()
-        self.operators: Dict[str, Any] = {}
+        self.optim_operator: Optional[OptimizerOperator]
         
         self.server = TorchBoardServer(board=self)
         self.server.start()
@@ -38,7 +38,7 @@ class Board:
         
     def update_variable(self, name: str, value: Any):
         if name.startswith('optim_'):
-            self.operators['Optimizer'].update_parameters(name[6:], value)
+            self.optim_operator.update_parameters(name[6:], value)
         self.server.update_changeable_value(name, value)
         #TODO update other variables
     
@@ -54,14 +54,9 @@ class Board:
         reverse_parsing: Dict[_SUPPORTED, Any] = {Board._match_argument(
             arg): kwargs[arg_name] for arg_name, arg in kwargs.items()}
         if 'Optimizer' in reverse_parsing:
-            optim = reverse_parsing['Optimizer']
+            optim: Optimizer = reverse_parsing['Optimizer']
             optim_operator = OptimizerOperator.get_optimizer(optim)
-            
-            for k in optim_operator.get_parameters().keys():
-                optim_value = optim.param_groups[0][k] #grab set value from optimizer
-                self.server.register_changeable_value(f"optim_{k}", optim_value)
-            
-            self.operators['Optimizer'] = optim_operator
+            self.optim_operator = optim_operator
             self.optim = optim
         if 'Model' in reverse_parsing:
             model = reverse_parsing['Model']
