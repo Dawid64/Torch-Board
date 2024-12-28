@@ -65,7 +65,7 @@ def test_example():
         loss.backward()
         optimizer.step()
 
-        # board.update(acc=acc)
+        board.update(acc=acc)
         accuracies.append(float(acc))
     assert board.operators['Optimizer'].optim is optimizer
     assert board.model is model
