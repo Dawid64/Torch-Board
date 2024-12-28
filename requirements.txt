@@ -3,7 +3,8 @@ torch
 
 # Examples
 scikit-learn
-numpy 
+numpy
+torchvision
 
 # Backend
 flask
