@@ -5,6 +5,7 @@ from torch.optim import Optimizer
 _SUPPORTED = Literal['Model', 'Optimizer', 'List', 'Value']
 _RESPONSE = Dict[str, Union[int, float]]
 
+
 class Board:
     def __init__(self):
         self.model: Optional[Module]
@@ -47,9 +48,7 @@ class Board:
         history_part = self.history[self.last_get_index:]
         self.last_get_index = len(self.history)
         return history_part
-    
+
     def get_all(self) -> List[_RESPONSE]:
         self.last_get_index = len(self.history)
         return self.history
-    
-    

@@ -1,6 +1,11 @@
 torch
-scikit-learn # just for examples
 
-#backend
+# Examples
+scikit-learn
+
+# Backend
 flask
 flask_cors
+
+# Testing
+pytest
