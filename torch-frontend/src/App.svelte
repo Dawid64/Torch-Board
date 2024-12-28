@@ -273,7 +273,7 @@ onDestroy(() => {
 
 <main>
   <section>
-    <h1>My Svelte TypeScript App</h1>
+    <h1 style="color:orange">Torch-Board</h1>
     <!-- <p>This is some static text.</p> -->
   </section>
 
