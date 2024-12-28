@@ -65,8 +65,8 @@ class TorchBoardServer():
 
     @cross_origin()
     def __get_history(self) -> flask.Response:
-        history_list = self.board.history.get_all()
-        return flask.jsonify(transform_history_dict(history_list)),200
+        history = self.board.history.get_all()
+        return flask.jsonify(history), 200
     
     @cross_origin()
     def __get_variables(self) -> flask.Response:
