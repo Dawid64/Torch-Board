@@ -5,7 +5,7 @@ from torch.optim import Optimizer
 class OptimizerOperator:
     def __init__(self, optimizer: Optimizer):
         self.optim = optimizer
-        self.parameters: Set[str] = set()
+        self.parameters: Set[str] = set(self.get_parameters().keys())
 
     def get_parameters(self) -> Dict[str, type]:
         raise NotImplementedError("Optimizer not selected")
@@ -15,7 +15,11 @@ class OptimizerOperator:
 
     def update_parameters(self, parameter: str, value: Any):
         assert parameter in self.parameters, f"Parameter {parameter} not found in {self.optim.__class__.__name__}"
-        setattr(self.optim, parameter, value)
+        for group in self.optim.param_groups:
+            group[parameter] = value
+            
+    def get_parameter_value(self, parameter: str) -> Any:
+        return self.optim.param_groups[0][parameter]
 
     @staticmethod
     def get_optimizer(optimizer) -> "OptimizerOperator":
