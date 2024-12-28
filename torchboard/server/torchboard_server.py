@@ -96,32 +96,27 @@ class TorchBoardServer():
             
         self.update_variable(name, value)
         return flask.jsonify({'status': 'success'}),200
-
-    def __run_flask(self) -> None:
-        self.server.serve_forever()
     
     def start(self) -> None:
         if self.__flask_process:
             return
-        self.__flask_process = Thread(target=self.__run_flask)
+        self.__flask_process = Thread(target=self.server.serve_forever)
+        self.__flask_process.daemon = True
         self.__flask_process.start()
+        
+        if os.path.exists('flask_session'):
+            wipe_dir('flask_session')
+            
         webbrowser.open(f'http://{self.host}:{self.port}') #Force open browser to dashboard
     
     def stop(self) -> None:
         if not self.__flask_process:
             return
         print('Stopping server')
-        
-        
-        wipe_dir('flask_session') 
-        os.rmdir('flask_session') 
-        
         self.server.shutdown()
         print('Server stopped')
         self.__flask_process.join()
         self.__flask_process = None
-        
-        #return NotImplementedError('Not implemented yet')
         
     
     def add_listener_variable(self, name:str, value:Any) -> None:
@@ -154,7 +149,7 @@ class TorchBoardServer():
     def get_variables(self) -> dict[str, Any]:
         return {k:v for k,v in self.variable_state.items()}
     
-        
+'''     
 if __name__ == '__main__':
     import time
     server = TorchBoardServer(static_path='../../static')
@@ -170,4 +165,4 @@ if __name__ == '__main__':
             time.sleep(1)
     except KeyboardInterrupt:
         server.stop()
-        
+'''
