@@ -47,7 +47,7 @@ def train(model, x_train, y_train, x_val, y_val, epochs=100, lr=0.01):
         loss.backward()
         optimizer.step()
         print(f"Epoch {epoch} loss: {loss.item()} accuracy: {acc}")
-        board.update(acc)
+        board.update(acc=acc, optimizer=optimizer)
         validate(model, x_val, y_val, criterion)
 
 
