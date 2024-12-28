@@ -140,10 +140,11 @@ class TorchBoardServer():
             return None
     
     def get_variables(self) -> dict[str, Any]:
-        return self.variable_state
+        return {k:v for k,v in self.variable_state.items()}
+    
         
 if __name__ == '__main__':
-    import time
+    import time, sys
     server = TorchBoardServer(static_path='../../static')
     server.register_variable('test_int', 2137)
     server.register_variable('test_str', 'Hello')
