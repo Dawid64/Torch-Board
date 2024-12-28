@@ -57,6 +57,7 @@ class TorchBoardServer():
         self.app.add_url_rule('/update_variable','update_variable', self.__update_variable, methods=['PUT'])
         self.app.add_url_rule('/do_action','do_action', self.__do_action, methods=['POST'])
         
+
         self.server = make_server(self.host, self.port, self.app, threaded=True)
         self.server.daemon_threads = True
     
@@ -80,8 +81,7 @@ class TorchBoardServer():
     
     @cross_origin()
     def __get_changes_session(self) -> flask.Response:
-        changes_list = self.board.history.get_since_last_change()
-        return flask.jsonify(transform_history_dict(changes_list)),200
+        return flask.jsonify(self.board.history.get_since_last_change()),200
 
     @cross_origin()
     def __get_history(self) -> flask.Response:
@@ -115,6 +115,7 @@ class TorchBoardServer():
         action = data['action']
         match action:
             case 'toggle_training':
+                
                 self.board.toggle_training()
                 return flask.jsonify({'status': 'success'}),200
             case 'save_model':

@@ -56,7 +56,7 @@ def test_example():
     board.update(optimizer=optimizer, model=model)
     accuracies = []
     # Training loop
-    for _ in range(10000):
+    for _ in range(100000):
         optimizer.zero_grad()
         y_pred = model.forward(X_train)
         acc = (y_pred.argmax(dim=1) == y_train).float().mean()
@@ -67,7 +67,7 @@ def test_example():
         accuracies.append(float(acc))
     assert board.operators['Optimizer'].optim is optimizer
     assert board.model is model
-    assert accuracies == [i['acc'] for i in board.history.history if 'acc' in i]
+    assert accuracies ==  board.history.history['acc']
 
 if __name__ == '__main__': 
     test_example()

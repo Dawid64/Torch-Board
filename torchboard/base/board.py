@@ -30,7 +30,9 @@ class Board:
         listener_changes = {arg_name: float(kwargs[arg_name])
                    for arg_name, arg_type in parsed.items() if arg_type in ['Value']}
         
-        self.history.update(listener_changes)
+        if len(listener_changes) > 0:
+            print("Updating listener")
+            self.history.update(listener_changes)
         
         while not self.do_training:
             pass #Is this the best way to do this?        
@@ -42,6 +44,7 @@ class Board:
     
     def toggle_training(self):
         self.do_training = not self.do_training
+        print(f'Training is now {"on" if self.do_training else "off"}')
         
     def save_model(self):
         torch.save(self.model, 'model.pth')
