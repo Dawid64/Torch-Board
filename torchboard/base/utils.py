@@ -7,6 +7,7 @@ _RESPONSE = Dict[str, Union[int, float]]
 class History:
     def __init__(self):
         self.history: List[_RESPONSE] = []
+        self.last_get_index = 0
         
     def update(self, value: _RESPONSE):
         self.history.append(value)
