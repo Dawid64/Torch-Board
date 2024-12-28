@@ -111,11 +111,12 @@ class TorchBoardServer():
     @cross_origin()
     def __update_variable(self) -> flask.Response:
         data = flask.request.json
-        if any([key not in data for key in ['name','value']]):
+
+        if 'name' not in data or 'value' not in data:
             return flask.jsonify({'status': 'error', 'message': 'Invalid request'}),400
-            
-        name,value = data['name'],data['value']
-        
+
+        name, value = data['name'], data['value']
+
         if not name in self.variable_state:
             return flask.jsonify({'status': 'error', 'message': f'Variable {name} not found'}),404
             
