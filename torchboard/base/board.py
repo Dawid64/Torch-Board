@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Optional, Union
+import torch
 from torch.nn import Module
 from torch.optim import Optimizer
 from .utils import _SUPPORTED, History
@@ -24,6 +25,7 @@ class Board:
                    for arg_name, arg_type in parsed.items() if arg_type in ['Value']}
         self.history.update(changes)
 
+
     def _argument_parser(self, kwargs: Dict[str, Any]) -> Dict[str, _SUPPORTED]:
         parsed: Dict[str, _SUPPORTED] = {arg_name: Board._match_argument(
             arg) for arg_name, arg in kwargs.items()}
@@ -46,7 +48,7 @@ class Board:
             return 'Optimizer'
         elif isinstance(argument, List):
             return 'List'
-        elif isinstance(argument, Union[int, float]):
+        elif isinstance(argument, Union[int, float,torch.tensor]):
             return 'Value'
         else:
             raise NotImplementedError(
