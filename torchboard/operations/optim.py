@@ -20,7 +20,7 @@ class OptimizerOperator:
     @staticmethod
     def get_optimizer(optimizer) -> "OptimizerOperator":
         """ Returns Optimizer operator for proper of optimizers """
-        if optimizer not in __OPTIMIZERS__:
+        if optimizer.__class__.__name__ not in __OPTIMIZERS__:
             raise NotImplementedError(
                 f"Optimizer {optimizer} not supported")
         return __OPTIMIZERS__[optimizer.__class__.__name__](optimizer)

@@ -10,7 +10,6 @@ class History:
         
     def update(self, value: _RESPONSE):
         self.history.append(value)
-        
 
     def get_last(self) -> _RESPONSE:
         self.last_get_index = len(self.history)

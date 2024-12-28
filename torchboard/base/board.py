@@ -11,7 +11,6 @@ class Board:
     
     
     """
-
     def __init__(self):
         self.model: Optional[Module]
         self.optim: Optional[Optimizer]
@@ -29,13 +28,14 @@ class Board:
         parsed: Dict[str, _SUPPORTED] = {arg_name: Board._match_argument(
             arg) for arg_name, arg in kwargs.items()}
         reverse_parsing: Dict[_SUPPORTED, Any] = {Board._match_argument(
-            arg): arg_name for arg_name, arg in kwargs.items()}
-        if 'Optimizer' in parsed:
-            optim = parsed[reverse_parsing['Optimizer']]
+            arg): kwargs[arg_name] for arg_name, arg in kwargs.items()}
+        if 'Optimizer' in reverse_parsing:
+            optim = reverse_parsing['Optimizer']
             optim_operator = OptimizerOperator.get_optimizer(optim)
             self.operators['Optimizer'] = optim_operator
-        if 'Model' in parsed:
-            model = parsed[reverse_parsing['Model']]
+            self.optim = optim
+        if 'Model' in reverse_parsing:
+            model = reverse_parsing['Model']
             self.model = model
         return parsed
 
