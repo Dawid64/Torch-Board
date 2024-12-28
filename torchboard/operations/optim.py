@@ -14,8 +14,7 @@ class OptimizerOperator:
         return {parameter: getattr(self.optim, parameter) for parameter in self.parameters}
 
     def update_parameters(self, parameter: str, value: Any):
-        assert parameter in self.parameters, f"Parameter {
-            parameter} not found in {self.optim.__class__.__name__}"
+        assert parameter in self.parameters, f"Parameter {parameter} not found in {self.optim.__class__.__name__}"
         setattr(self.optim, parameter, value)
 
     @staticmethod
