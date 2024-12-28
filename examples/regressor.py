@@ -32,7 +32,7 @@ class Regressor(nn.Module):
 
 
 def train(model, x_train, y_train, x_val, y_val, epochs=100, lr=0.01):
-    optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
+    optimizer = optim.Rprop(model.parameters(), lr=lr, step_sizes=(1e-6, 50))
     criterion = nn.MSELoss()
     model.train()
     for epoch in range(epochs):
