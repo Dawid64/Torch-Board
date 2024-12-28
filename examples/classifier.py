@@ -34,7 +34,7 @@ class Classifier(nn.Module):
 
 
 def train(model, x_train, y_train, x_val, y_val, epochs=100, lr=0.01):
-    optimizer = optim.Adam(model.parameters(), lr=lr)
+    optimizer = optim.Adam(model.parameters(), lr=lr, betas=(0.9, 0.999))
     criterion = nn.CrossEntropyLoss()
     acc = []
     model.train()

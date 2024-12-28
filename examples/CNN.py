@@ -140,7 +140,7 @@ def full_suite(
     )
 
     criterion = nn.BCEWithLogitsLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    optimizer = torch.optim.Adagrad(model.parameters(), lr=lr, lr_decay=0.0001)
     for i in range(1, epochs + 1):
         print(f"Epoch: {i}")
         train_epoch(
