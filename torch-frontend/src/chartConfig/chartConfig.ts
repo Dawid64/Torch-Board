@@ -12,7 +12,7 @@ export const colorPalette = [
       },
       title: {
         display: true,
-        text: 'Dynamic Chart with Smooth Animation',
+        text: '',
       },
       tooltip: {
         enabled: true,

@@ -176,6 +176,27 @@ async function fetchAllDataAndAddToChart() {
     }
   }
 
+  async function updateVariableFromSelectList(variableFromSelectList: { [key: string]: any }) {
+    try {
+    const response = await fetch('http://127.0.0.1:8080/update_variable', {
+      method: 'PUT', // Ustawienie metody HTTP na PUT
+      headers: {
+        'Content-Type': 'application/json', // Określenie typu danych w body
+      },
+      body: JSON.stringify(variableFromSelectList), // Konwertowanie obiektu na JSON i wysyłanie w body
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const jsonData = await response.json(); // Oczekujemy odpowiedzi w formacie JSON
+    console.log('Response from backend:', jsonData); // Logujemy odpowiedź
+  } catch (error) {
+    console.error('Error updating variable:', error); // Logujemy błędy
+  }
+  }
+
   function updateSelectList(selectListData: Object[]) {
     variableSelectListData = selectListData;
   }
@@ -188,7 +209,7 @@ onMount(async () => {
   await fetchVariablesAndSetSelectList();
 
   // Ustaw timer do wykonywania `fetchDataAndAddToChart` co 1 sekundę
-  // intervalId = setInterval(fetchNewDataAndAddToChart, 1000);  // odkomentować do pobierania danych co 1s
+  intervalId = setInterval(fetchNewDataAndAddToChart, 1000);  // odkomentować do pobierania danych co 1s
 });
 
 onDestroy(() => {
@@ -242,19 +263,24 @@ onDestroy(() => {
   // Funkcja wywoływana po kliknięciu Submit
   function handleSubmit() {
     console.log("Submitted Values:", dynamicValues);
+    console.log("Submitted name:", selectedOption);
+    updateVariableFromSelectList({
+      name: selectedOption,
+      value: dynamicValues
+    });
   }
 </script>
 
 <main>
   <section>
     <h1>My Svelte TypeScript App</h1>
-    <p>This is some static text.</p>
+    <!-- <p>This is some static text.</p> -->
   </section>
 
-  <div>
-    <!-- Przyciski do dodawania danych -->
+      <!-- Przyciski do dodawania danych -->
+  <!-- <div>
     <button on:click={fetchNewDataAndAddToChart}>Fetch Data and Add to First Chart</button>
-  </div>
+  </div> -->
 
   <!-- <section>
     <h2>Counter</h2>
@@ -267,32 +293,24 @@ onDestroy(() => {
     <TextButton />
   </section> -->
 
-  <div>
-    <!-- Przyciski do dodawania danych -->
+      <!-- Przyciski do dodawania danych -->
+  <!-- <div>
     <button on:click={addDataToFirstChart}>Add Data to First Chart</button>
     <button on:click={addDataToSecondChart}>Add Data to Second Chart</button>
-  </div>
+  </div> -->
 
-  <div style="margin-top: 20px;">
+  <!-- <div class="container"> -->
+  <section class="chart-section" style="margin-top: 20px;">
     <!-- Pierwszy wykres -->
     <ChartComponent
       chartData={{ labels: labels1, datasets: datasets1 }}
       chartOptions={chartOptions}
       chartType="line"
     />
-  </div>
+  </section>
 
-  <div style="margin-top: 20px;">
-    <!-- Drugi wykres -->
-    <ChartComponent
-      chartData={{ labels: labels2, datasets: datasets2 }}
-      chartOptions={chartOptions}
-      chartType="line"
-    />
-  </div>
-
-  <section>
-    <h1>Select, Slider, and Submit Example</h1>
+  <section class="form-section">
+    <h2>Select, Slider, and Submit Example</h2>
 
     <!-- Select lista -->
   <label for="select">Select an element:</label>
@@ -305,7 +323,7 @@ onDestroy(() => {
 
   <!-- Generowanie komponentów dynamicznych -->
   {#if selectedElement}
-    <div style="margin-top: 20px;">
+    <div>
       {#if selectedElement.type === "bool"}
         <!-- Komponent bool -->
         <label>
@@ -403,8 +421,16 @@ onDestroy(() => {
     </div>
   {/if}
   </section>
+  <!-- </div> -->
 
-
+  <!-- Drugi wykres -->
+  <!-- <div style="margin-top: 20px;">
+    <ChartComponent
+      chartData={{ labels: labels2, datasets: datasets2 }}
+      chartOptions={chartOptions}
+      chartType="line"
+    />
+  </div> -->
 
   <!-- <section>
     <h2>Charts</h2>
@@ -421,10 +447,10 @@ onDestroy(() => {
     <AdvancedBarChart />
   </section> -->
 
-  <section>
+  <!-- <section>
     <h2>Neural Network</h2>
     <NeuralNetwork />
-  </section>
+  </section> -->
 </main>
 
 <style>
@@ -439,17 +465,61 @@ onDestroy(() => {
     width: 100%;
   }
 
-  button {
-    padding: 10px 15px;
+  input[type="number"] {
+    padding: 8px;
     font-size: 16px;
-    background-color: #4caf50;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100%;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    background-color: #282323;
+  }
+
+  input[type="number"]:focus {
+    outline: none;
+    border-color: #99C8FF;
+    box-shadow: 0 0 4px rgba(85, 114, 181, 0.6);
+  }
+
+  /* Styl dla przycisków */
+  button {
+    padding: 12px 18px;
+    font-size: 16px;
+    font-weight: 500;
+    background-color: #99C8FF;
     color: white;
-    border: none;
+    border: 1px solid #365575;
+    border-radius: 4px;
     cursor: pointer;
-    border-radius: 5px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
   }
 
   button:hover {
-    background-color: #45a049;
+    background-color: #99C8FF;
+    transform: translateY(-2px);
   }
+
+  button:active {
+    background-color: #6197d6;
+    transform: translateY(0);
+  }
+
+
+  /* .chart-section {
+    flex: 1;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+  }
+
+  .form-section {
+    flex: 1;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+  } */
 </style>
