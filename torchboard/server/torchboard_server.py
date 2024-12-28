@@ -61,14 +61,16 @@ class TorchBoardServer():
 
     @cross_origin()
     def __get_changes_session(self) -> flask.Response:
-        changes_list = self.board.history.get_since_last_change()
-        if len(changes_list) == 0:
-            return flask.jsonify({}),200
-        keys = set(changes_list[0].keys())
-        for change in changes_list[1:]:
-            keys = keys.union(set(change.keys()))
-        changes = {key: [item[key] for item in changes_list if key in item] for key in keys}
-        return flask.jsonify(changes),200
+        # changes_list = self.board.history.get_since_last_change()
+        # if len(changes_list) == 0:
+        #     return flask.jsonify({}),200
+        # 
+
+        # keys = set(changes_list[0].keys())
+        # for change in changes_list[1:]:
+        #     keys = keys.union(set(change.keys()))
+        # changes = {key: [item[key] for item in changes_list if key in item] for key in keys}
+        return flask.jsonify(self.board.history.get_since_last_change()),200
 
     @cross_origin()
     def __get_history(self) -> flask.Response:

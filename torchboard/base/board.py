@@ -27,8 +27,10 @@ class Board:
         
         listener_changes = {arg_name: float(kwargs[arg_name])
                    for arg_name, arg_type in parsed.items() if arg_type in ['Value']}
-        self.history.update(listener_changes)
-        self.server.add_listener_variables(listener_changes)
+        
+        if len(listener_changes) > 0:
+            self.history.update(listener_changes)
+            self.server.add_listener_variables(listener_changes)
         
         for k,v in self.server.get_variables().items():
             if k.startswith('optim_'):
