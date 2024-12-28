@@ -31,18 +31,40 @@ class Regressor(nn.Module):
         return self.linear5(x)
 
 
-def train(model, x_train, y_train, x_val, y_val, epochs=100, lr=0.01):
+class DiabetesDataset(torch.utils.data.Dataset):
+    def __init__(self, X, y):
+        self.X = X
+        self.y = y
+
+    def __len__(self):
+        return len(self.X)
+
+    def __getitem__(self, ix):
+        return self.X[ix], self.y[ix]
+
+    def collate_fn(self, batch):
+        X, y = zip(*batch)
+        X = torch.stack(X)
+        y = torch.tensor(y).float()
+        return X, y
+
+
+def train(model, train_loader, val_loader, epochs=100, lr=0.01):
     optimizer = optim.Rprop(model.parameters(), lr=lr, step_sizes=(1e-6, 50))
     criterion = nn.MSELoss()
     model.train()
     for epoch in range(epochs):
-        optimizer.zero_grad()
-        y_pred = model.forward(x_train)
-        loss = criterion(y_pred, y_train)
-        loss.backward()
-        optimizer.step()
-        print(f"Epoch {epoch} loss: {loss.item()}")
-        validate(model, x_val, y_val, criterion)
+        for batch in train_loader:
+            X, y = batch
+            optimizer.zero_grad()
+            y_pred = model.forward(X)
+            loss = criterion(y_pred, y)
+            loss.backward()
+            optimizer.step()
+            print(f"Epoch {epoch} loss: {loss.item()}")
+        for batch in val_loader:
+            X, y = batch
+            validate(model, X, y, criterion)
 
 
 @torch.no_grad()
@@ -54,6 +76,7 @@ def validate(model, x_val, y_val, criterion):
 
 
 if __name__ == "__main__":
+    batch_size = 32
     diabetes = datasets.load_diabetes()
     X = diabetes.data
     y = diabetes.target
@@ -65,6 +88,25 @@ if __name__ == "__main__":
         X_tensor, y_tensor, test_size=0.2, random_state=42
     )
 
+    train_dataset = DiabetesDataset(X_train, y_train)
+    valid_dataset = DiabetesDataset(X_val, y_val)
+
+    train_loader = torch.utils.data.DataLoader(
+        train_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        collate_fn=train_dataset.collate_fn,
+        drop_last=True,
+    )
+
+    val_loader = torch.utils.data.DataLoader(
+        valid_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        collate_fn=valid_dataset.collate_fn,
+        drop_last=True,
+    )
+
     model = Regressor(input_features=10)
 
-    train(model, X_train, y_train, X_val, y_val, epochs=50, lr=0.01)
+    train(model, train_loader, val_loader, epochs=50, lr=0.01)
