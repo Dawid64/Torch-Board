@@ -117,32 +117,32 @@ class TorchBoardServer():
         self.__flask_process.join()
         self.__flask_process = None
         
-    def add_listener_variable(self, name:str, value:Any) -> None:
+    def update_observed_value(self, name:str, value:Any) -> None:
         if name not in self.listener_state:
             self.listener_state[name] = []
         self.listener_state[name].append(value)
     
-    def add_listener_variables(self, variables:dict[str, Any]) -> None:
+    def update_observed_values(self, variables:dict[str, Any]) -> None:
         for key, value in variables.items():
-            self.add_listener_variable(key, value)
+            self.update_observed_value(key, value)
     
-    def get_listener_variable_history(self, name:str) -> List[Any] | None:
+    def get_observed_value_history(self, name:str) -> List[Any] | None:
         if name in self.listener_state:
             return self.listener_state[name]
         else:
             return None        
         
-    def register_variable(self,name:str,default_value:Any) -> None:
+    def register_changeable_value(self,name:str,default_value:Any) -> None:
         self.variable_state[name] = default_value
         
-    def update_variable(self,name:str,value:Any) -> None:
+    def update_changeable_value(self,name:str,value:Any) -> None:
         self.variable_state[name] = value
         
-    def get_variable(self,name:str) -> Any | None:
+    def get_changeable_value(self,name:str) -> Any | None:
         if name in self.variable_state:
             return self.variable_state[name]
         else:
             return None
     
-    def get_variables(self) -> dict[str, Any]:
+    def get_changeable_values(self) -> dict[str, Any]:
         return {k:v for k,v in self.variable_state.items()}

@@ -65,7 +65,7 @@ def test_example():
         optimizer.step()
         board.update(acc=acc)
         accuracies.append(float(acc))
-        
+        time.sleep(0.1)
     assert board.operators['Optimizer'].optim is optimizer
     assert board.model is model
     assert accuracies == [i['acc'] for i in board.history.history if 'acc' in i]

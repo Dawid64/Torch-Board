@@ -28,9 +28,9 @@ class Board:
         listener_changes = {arg_name: float(kwargs[arg_name])
                    for arg_name, arg_type in parsed.items() if arg_type in ['Value']}
         self.history.update(listener_changes)
-        self.server.add_listener_variables(listener_changes)
+        self.server.update_observed_values(listener_changes)
         
-        for k,v in self.server.get_variables().items():
+        for k,v in self.server.get_changeable_values().items():
             if k.startswith('optim_'):
                 old_v = self.operators["Optimizer"].get_parameter_value(k[6:])
                 if old_v != v:
@@ -50,7 +50,7 @@ class Board:
             
             for k,v in optim_operator.get_parameters().items():
                 optim_value = optim.param_groups[0][k]
-                self.server.register_variable(f"optim_{k}", optim_value)
+                self.server.register_changeable_value(f"optim_{k}", optim_value)
             
             self.operators['Optimizer'] = optim_operator
             self.optim = optim
