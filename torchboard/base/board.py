@@ -3,7 +3,7 @@ import torch
 from torch.nn import Module
 from torch.optim import Optimizer
 from .utils import _SUPPORTED, History
-
+from torchboard.operations.optim import OptimizerOperator
 
 # TODO: Add documentation
 class Board:
@@ -16,6 +16,7 @@ class Board:
         self.model: Optional[Module]
         self.optim: Optional[Optimizer]
         self.history: History = History()
+        self.operators: Dict[str, Any] = {}
 
     def update(self, **kwargs):
         """ Update arguments """
@@ -29,10 +30,13 @@ class Board:
             arg) for arg_name, arg in kwargs.items()}
         reverse_parsing: Dict[_SUPPORTED, Any] = {Board._match_argument(
             arg): arg_name for arg_name, arg in kwargs.items()}
-        optim = parsed[reverse_parsing['Optimizer']]
-        model = parsed[reverse_parsing['Model']]
-        self.model = model
-        self.optim = optim
+        if 'Optimizer' in parsed:
+            optim = parsed[reverse_parsing['Optimizer']]
+            optim_operator = OptimizerOperator.get_optimizer(optim)
+            self.operators['Optimizer'] = optim_operator
+        if 'Model' in parsed:
+            model = parsed[reverse_parsing['Model']]
+            self.model = model
         return parsed
 
     @staticmethod
