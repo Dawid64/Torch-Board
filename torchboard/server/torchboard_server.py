@@ -12,6 +12,10 @@ from typing import Any, List
 import os
 from torchboard.server.utils import wipe_dir
 
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
 class TorchBoardServer():
     port:int
     host:str
