@@ -68,17 +68,12 @@ class TorchBoardServer():
         for change in changes_list[1:]:
             keys = keys.union(set(change.keys()))
         changes = {key: [item[key] for item in changes_list if key in item] for key in keys}
-        return flask.jsonify(changes),200
+        return flask.jsonify(changes), 200
 
     @cross_origin()
     def __get_history(self) -> flask.Response:
-        ret = dict()
-        for key in self.listener_state:
-            ret[key] = self.listener_state[key]
-            if not 'history_indexes' in flask.session:
-                flask.session['history_indexes'] = dict()
-            flask.session['history_indexes'][key] = len(self.listener_state[key])
-        return flask.jsonify(ret),200
+        history = self.board.history.get_all()
+        return flask.jsonify(history), 200
     
     @cross_origin()
     def __get_variables(self) -> flask.Response:
