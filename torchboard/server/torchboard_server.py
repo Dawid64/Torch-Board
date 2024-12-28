@@ -115,6 +115,11 @@ class TorchBoardServer:
         return flask.jsonify({"status": "success"}), 200
 
     @cross_origin()
+    def __get_model_layers(self) -> flask.Response:
+        layers = self.board.model.get_layers()
+        return flask.jsonify(layers), 200
+
+    @cross_origin()
     def __return_cached_output(self) -> flask.Response:
         if self.board.model.cache is None:
             return flask.jsonify({"status": "error", "message": "No imaged yet"}), 404
