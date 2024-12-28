@@ -42,7 +42,6 @@ def train(model, x_train, y_train, x_val, y_val, epochs=100, lr=0.01):
     board.update(optimizer=optimizer, model=model, criterion=criterion)
     print(board.criterion)
     model.train()
-    board.update(optimizer=optimizer)
     for epoch in range(epochs):
         optimizer.zero_grad()
         y_pred = model.forward(x_train)

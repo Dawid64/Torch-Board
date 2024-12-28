@@ -39,9 +39,9 @@ class TorchBoardServer():
     static_path:str
 
     variable_state:dict[str, Any]
-    
+
     app:flask.Flask
-    
+
     def __init__(self, port:int=8080, host:str='127.0.0.1', name:str='TorchBoard', static_path:str='static', board:Any=None) -> None:
         from torchboard.base.board import Board
         self.port = port
@@ -56,14 +56,14 @@ class TorchBoardServer():
         
         self.app.config["SECRET_KEY"] = secrets.token_urlsafe(16)
         self.app.config['SESSION_TYPE'] = 'filesystem'
-        
+
         CORS(self.app, resources={r"/*": {"origins": "*"}}) #TODO: Change origins to specific domain
         Session(self.app)
 
         @self.app.route('/')
         def index():
             return flask.send_from_directory(self.static_path, 'index.html')
-        
+
         @self.app.route('/<path:path>')
         def static_proxy(path):
             return flask.send_from_directory(self.static_path, path)
