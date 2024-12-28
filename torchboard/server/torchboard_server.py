@@ -57,7 +57,25 @@ class TorchBoardServer():
         
         self.server = make_server(self.host, self.port, self.app, threaded=True)
         self.server.daemon_threads = True
+    
+    
+    def start(self, start_browser=False) -> None:
+        if self.__flask_process:
+            return
+        self.__flask_process = Thread(target=self.server.serve_forever)
+        self.__flask_process.daemon = True
+        self.__flask_process.start()
         
+        if os.path.exists('flask_session'):
+            wipe_dir('flask_session')
+        
+        if start_browser:
+            webbrowser.open(f'http://{self.host}:{self.port}') #Force open browser to dashboard
+    
+    def stop(self) -> None:
+        self.__flask_process.join()
+        self.__flask_process = None
+    
     @cross_origin()
     def __get_changes_session(self) -> flask.Response:
         changes_list = self.board.history.get_since_last_change()
@@ -85,23 +103,6 @@ class TorchBoardServer():
             
         self.update_changeable_value(name, value)
         return flask.jsonify({'status': 'success'}),200
-    
-    def start(self, start_browser=False) -> None:
-        if self.__flask_process:
-            return
-        self.__flask_process = Thread(target=self.server.serve_forever)
-        self.__flask_process.daemon = True
-        self.__flask_process.start()
-        
-        if os.path.exists('flask_session'):
-            wipe_dir('flask_session')
-        
-        if start_browser:
-            webbrowser.open(f'http://{self.host}:{self.port}') #Force open browser to dashboard
-    
-    def stop(self) -> None:
-        self.__flask_process.join()
-        self.__flask_process = None     
         
     def register_changeable_value(self,name:str,default_value:Any) -> None:
         self.variable_state[name] = default_value
