@@ -123,8 +123,7 @@ class TorchBoardServer():
     
     @cross_origin()
     def __get_changes_session(self) -> flask.Response:
-        changes_list = self.board.history.get_since_last_change()
-        return flask.jsonify(transform_history_dict(changes_list)),200
+        return flask.jsonify(self.board.history.get_since_last_change()),200
 
     @cross_origin()
     def __get_history(self) -> flask.Response:

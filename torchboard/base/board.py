@@ -30,7 +30,8 @@ class Board:
         
         if len(listener_changes) > 0:
             self.history.update(listener_changes)
-            self.server.add_listener_variables(listener_changes)
+            # TODO idk co to
+            # self.server.add_listener_variables(listener_changes)
         
         for k,v in self.server.get_changeable_values().items():
             if k.startswith('optim_'):
