@@ -89,3 +89,5 @@ def test_example():
 
 
 
+def test2():
+    assert True
