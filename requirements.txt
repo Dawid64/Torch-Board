@@ -1,7 +1,9 @@
+# Main library
 torch
 
 # Examples
 scikit-learn
+numpy 
 
 # Backend
 flask
