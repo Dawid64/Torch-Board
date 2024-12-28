@@ -4,7 +4,6 @@ import torch.optim as optim
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
 from torchboard import board
-
 class Classifier(nn.Module):
     def __init__(self, input_features=10, output_classes=5):
         super(Classifier, self).__init__()
@@ -18,7 +17,7 @@ class Classifier(nn.Module):
         self.linear4 = torch.nn.Linear(32, 16)
         self.activation4 = torch.nn.ReLU()
         self.linear5 = torch.nn.Linear(16, output_classes)
-        self.softmax = torch.nn.Softmax(1)
+        self.softmax = torch.nn.Softmax()
 
     def forward(self, x):
         x = self.linear1(x)
@@ -30,11 +29,37 @@ class Classifier(nn.Module):
         x = self.linear4(x)
         x = self.activation4(x)
         x = self.linear5(x)
-        x = self.softmax(x)
-        return x
+        return self.softmax(x)
 
 
-def test_example():
+def train(model, x_train, y_train, x_val, y_val, epochs=100, lr=0.01):
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+    criterion = nn.CrossEntropyLoss()
+    nn.HuberLoss
+    acc = []
+    board.update(optimizer=optimizer, model=model, criterion=criterion)
+    print(board.criterion)
+    model.train()
+    for epoch in range(epochs):
+        optimizer.zero_grad()
+        y_pred = model.forward(x_train)
+        acc = (y_pred.argmax(dim=1) == y_train).float().mean()
+        loss = criterion(y_pred, y_train)
+        loss.backward()
+        optimizer.step()
+        print(f"Epoch {epoch} loss: {loss.item()} accuracy: {acc}")
+        validate(model, x_val, y_val, criterion)
+
+
+@torch.no_grad()
+def validate(model, x_val, y_val, criterion):
+    model.eval()
+    y_pred = model.forward(x_val)
+    loss = criterion(y_pred, y_val)
+    print(f"Validation loss: {loss.item()} \n")
+
+
+if __name__ == "__main__":
     iris = datasets.load_iris()
     X = iris.data
     y = iris.target
@@ -42,31 +67,10 @@ def test_example():
     X_tensor = torch.tensor(X, dtype=torch.float32)
     y_tensor = torch.tensor(y, dtype=torch.long)
 
-    X_train, _, y_train, _ = train_test_split(
+    X_train, X_val, y_train, y_val = train_test_split(
         X_tensor, y_tensor, test_size=0.2, random_state=42
     )
 
     model = Classifier(input_features=4, output_classes=3)
 
-    optimizer = optim.Adam(model.parameters(), lr=.001)
-    criterion = nn.CrossEntropyLoss()
-    acc = []
-    model.train()
-    board.update(optimizer=optimizer, model=model, criterion=criterion)
-
-    accuracies = []
-    # Training loop
-    for _ in range(100):
-        optimizer.zero_grad()
-        y_pred = model.forward(X_train)
-        acc = (y_pred.argmax(dim=1) == y_train).float().mean()
-        loss = criterion(y_pred, y_train)
-        loss.backward()
-        optimizer.step()
-
-
-        board.update(acc=acc)
-        accuracies.append(float(acc))
-    assert board.operators['Optimizer'].optim is optimizer
-    assert board.model is model
-    assert accuracies == [i['acc'] for i in board.history.history if 'acc' in i]
+    train(model, X_train, y_train, X_val, y_val, epochs=15, lr=0.01)
