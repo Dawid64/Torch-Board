@@ -1,4 +1,5 @@
 from typing import Dict, List, Literal, Union
+from torch.nn.modules.loss import _Loss
 
 
 _SUPPORTED = Literal['Model', 'Optimizer', 'List', 'Value']
@@ -23,3 +24,14 @@ class History:
     def get_all(self) -> List[_RESPONSE]:
         self.last_get_index = len(self.history)
         return self.history
+    
+
+def overwrite_criterion_loss_update(criterion: _Loss, func: callable) -> _Loss:
+    criterion.base_forward = criterion.forward
+    def forward(*args, **kwargs):
+        loss = criterion.base_forward(*args, **kwargs)
+        func(loss=loss)
+        return loss
+    criterion.forward = forward    
+    return criterion
+

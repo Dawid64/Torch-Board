@@ -2,10 +2,11 @@ from typing import Any, Dict, List, Optional, Union
 import torch
 from torch.nn import Module
 from torch.optim import Optimizer
-from .utils import _SUPPORTED, History
+from .utils import _SUPPORTED, History, overwrite_criterion_loss_update
 from torchboard.operations.optim import OptimizerOperator
+from torch.nn.modules.loss import _Loss
 
-from torch.nn.modules.loss import _Loss 
+
 
 # TODO: Add documentation
 class Board:
@@ -42,13 +43,7 @@ class Board:
             self.model = model
         if 'Criterion' in reverse_parsing:
             criterion = reverse_parsing['Criterion']
-            criterion.base_forward = criterion.forward
-            def forward(*args, **kwargs):
-                loss = criterion.base_forward(*args, **kwargs)
-                self.update(loss=loss)
-                return loss
-            criterion.forward = forward    
-            self.criterion = criterion
+            self.criterion = overwrite_criterion_loss_update(criterion=criterion, func=self.update)
         return parsed
 
     @staticmethod

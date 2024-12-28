@@ -4,8 +4,6 @@ import torch.optim as optim
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
 from torchboard import board
-
-
 class Classifier(nn.Module):
     def __init__(self, input_features=10, output_classes=5):
         super(Classifier, self).__init__()
@@ -37,7 +35,10 @@ class Classifier(nn.Module):
 def train(model, x_train, y_train, x_val, y_val, epochs=100, lr=0.01):
     optimizer = optim.Adam(model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss()
+    nn.HuberLoss
     acc = []
+    board.update(optimizer=optimizer, model=model, criterion=criterion)
+    print(board.criterion)
     model.train()
     for epoch in range(epochs):
         optimizer.zero_grad()
@@ -47,7 +48,7 @@ def train(model, x_train, y_train, x_val, y_val, epochs=100, lr=0.01):
         loss.backward()
         optimizer.step()
         print(f"Epoch {epoch} loss: {loss.item()} accuracy: {acc}")
-        board.update(acc=acc, optimizer=optimizer)
+        # board.update(acc=acc, optimizer=optimizer)
         validate(model, x_val, y_val, criterion)
 
 
