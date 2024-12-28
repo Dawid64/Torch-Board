@@ -143,14 +143,18 @@ class TorchBoardServer():
         return self.variable_state
         
 if __name__ == '__main__':
+    import time
     server = TorchBoardServer(static_path='../../static')
-    server.add_listener_variables({'test': 1, 'test2': 2})
-    server.register_variable('test', 1)
+    server.register_variable('test_int', 2137)
+    server.register_variable('test_str', 'Hello')
+    server.register_variable('test_float', 0.534)
     server.run()
     try:
-        #this is stupid
+        i = 1
         while True:
-            pass    
+            server.add_listener_variables({"accuracy":-(1/i)+1,"loss":1/i*5})
+            i+=1
+            time.sleep(1)
     except KeyboardInterrupt:
         server.stop()
     
