@@ -3,15 +3,14 @@ from flask_cors import CORS, cross_origin
 from flask_session import Session
 from werkzeug.serving import make_server
 
-from threading import Thread, Event
-
 import webbrowser
 
-from typing import Any, List
+from threading import Thread
 
 import os
-from torchboard.server.utils import wipe_dir
+from torchboard.server.utils import wipe_dir, transform_history_dict
 
+from typing import Any, List
 import logging
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
@@ -29,8 +28,8 @@ class TorchBoardServer():
     def __init__(self, port:int=8080, host:str='127.0.0.1', name:str='TorchBoard', static_path:str='static', board:Any=None) -> None:
         self.port = port
         self.host = host
-    
-        self.listener_state = dict()
+        self.static_path = static_path        
+        
         self.variable_state = dict()
         
         self.app = flask.Flask(name)
@@ -45,11 +44,11 @@ class TorchBoardServer():
 
         @self.app.route('/')
         def index():
-            return flask.send_from_directory('static', 'index.html')
+            return flask.send_from_directory(self.static_path, 'index.html')
         
         @self.app.route('/<path:path>')
         def static_proxy(path):
-            return flask.send_from_directory('static', path)
+            return flask.send_from_directory(self.static_path, path)
         
         self.app.add_url_rule('/get_changes','get_changes', self.__get_changes_session, methods=['GET'])
         self.app.add_url_rule('/get_history','get_history', self.__get_history, methods=['GET'])
@@ -101,6 +100,9 @@ class TorchBoardServer():
             
         self.update_variable(name, value)
         return flask.jsonify({'status': 'success'}),200
+        self.server = make_server(self.host, self.port, self.app, threaded=True)
+        self.server.daemon_threads = True
+    
     
     def start(self, start_browser=False) -> None:
         if self.__flask_process:
@@ -116,58 +118,48 @@ class TorchBoardServer():
             webbrowser.open(f'http://{self.host}:{self.port}') #Force open browser to dashboard
     
     def stop(self) -> None:
-        if not self.__flask_process:
-            return
-        print('Stopping server')
-        self.server.shutdown()
-        print('Server stopped')
         self.__flask_process.join()
         self.__flask_process = None
-        
-    def add_listener_variable(self, name:str, value:Any) -> None:
-        if name not in self.listener_state:
-            self.listener_state[name] = []
-        self.listener_state[name].append(value)
     
-    def add_listener_variables(self, variables:dict[str, Any]) -> None:
-        for key, value in variables.items():
-            self.add_listener_variable(key, value)
+    @cross_origin()
+    def __get_changes_session(self) -> flask.Response:
+        changes_list = self.board.history.get_since_last_change()
+        return flask.jsonify(transform_history_dict(changes_list)),200
+
+    @cross_origin()
+    def __get_history(self) -> flask.Response:
+        history = self.board.history.get_all()
+        return flask.jsonify(history), 200
     
-    def get_listener_variable_history(self, name:str) -> List[Any] | None:
-        if name in self.listener_state:
-            return self.listener_state[name]
-        else:
-            return None        
+    @cross_origin()
+    def __get_variables(self) -> flask.Response:
+        return flask.jsonify({key:value for key,value in self.variable_state.items()}),200
+    
+    @cross_origin()
+    def __update_variable(self) -> flask.Response:
+        data = flask.request.json
+        if any([key not in data for key in ['name','value']]):
+            return flask.jsonify({'status': 'error', 'message': 'Invalid request'}),400
+            
+        name,value = data['name'],data['value']
         
-    def register_variable(self,name:str,default_value:Any) -> None:
+        if not name in self.variable_state:
+            return flask.jsonify({'status': 'error', 'message': f'Variable {name} not found'}),404
+            
+        self.update_changeable_value(name, value)
+        return flask.jsonify({'status': 'success'}),200
+        
+    def register_changeable_value(self,name:str,default_value:Any) -> None:
         self.variable_state[name] = default_value
         
-    def update_variable(self,name:str,value:Any) -> None:
+    def update_changeable_value(self,name:str,value:Any) -> None:
         self.variable_state[name] = value
         
-    def get_variable(self,name:str) -> Any | None:
+    def get_changeable_value(self,name:str) -> Any | None:
         if name in self.variable_state:
             return self.variable_state[name]
         else:
             return None
     
-    def get_variables(self) -> dict[str, Any]:
+    def get_changeable_values(self) -> dict[str, Any]:
         return {k:v for k,v in self.variable_state.items()}
-    
-'''     
-if __name__ == '__main__':
-    import time
-    server = TorchBoardServer(static_path='../../static')
-    server.register_variable('test_int', 2137)
-    server.register_variable('test_str', 'Hello')
-    server.register_variable('test_float', 0.534)
-    server.start()
-    try:
-        i = 1
-        while True:
-            server.add_listener_variables({"accuracy":-(1/i)+1,"loss":1/i*5})
-            i+=1
-            time.sleep(1)
-    except KeyboardInterrupt:
-        server.stop()
-'''

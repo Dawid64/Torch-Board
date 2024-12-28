@@ -32,7 +32,7 @@ class Board:
             self.history.update(listener_changes)
             self.server.add_listener_variables(listener_changes)
         
-        for k,v in self.server.get_variables().items():
+        for k,v in self.server.get_changeable_values().items():
             if k.startswith('optim_'):
                 old_v = self.operators["Optimizer"].get_parameter_value(k[6:])
                 if old_v != v:
@@ -52,7 +52,7 @@ class Board:
             
             for k,v in optim_operator.get_parameters().items():
                 optim_value = optim.param_groups[0][k]
-                self.server.register_variable(f"optim_{k}", optim_value)
+                self.server.register_changeable_value(f"optim_{k}", optim_value)
             
             self.operators['Optimizer'] = optim_operator
             self.optim = optim
@@ -74,3 +74,6 @@ class Board:
         else:
             raise NotImplementedError(
                 f'There is currently no support for: {argument.__class__}')
+            
+    def __del__(self):
+        self.server.stop()

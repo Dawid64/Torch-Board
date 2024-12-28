@@ -65,10 +65,10 @@ def test_example():
         optimizer.step()
         board.update(acc=acc)
         accuracies.append(float(acc))
-        
+        time.sleep(0.1)
     assert board.operators['Optimizer'].optim is optimizer
     assert board.model is model
     assert accuracies ==  board.history.history['acc']
 
-if __name__ == '__main__':
+if __name__ == '__main__': 
     test_example()
