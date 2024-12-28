@@ -26,7 +26,13 @@ class History:
         """
         Get all values that changed since last get as dict of lists 
         """
-        return {key: value[self.last_indexes[key]:] for key, value in self.history.items() if self.last_indexes[key] < len(value)}
+        last_change = {}
+        for key, value in self.history.items():
+            if self.last_indexes[key] < len(value):
+                last_change[key] = value[self.last_indexes[key]:]   
+                self.last_indexes[key] = len(value)
+
+        return last_change
 
     def get_all(self) -> _STRUCT:
         self.last_indexes = {key: len(value) for key, value in self.history.items()}
