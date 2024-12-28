@@ -4,6 +4,7 @@ import torch.optim as optim
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
 from torchboard import board
+import time
 
 class Classifier(nn.Module):
     def __init__(self, input_features=10, output_classes=5):
@@ -37,7 +38,7 @@ class Classifier(nn.Module):
 def test_example():
     iris = datasets.load_iris()
     X = iris.data
-    y = iris.target
+    y = iris.target 
 
     X_tensor = torch.tensor(X, dtype=torch.float32)
     y_tensor = torch.tensor(y, dtype=torch.long)
@@ -56,6 +57,7 @@ def test_example():
     accuracies = []
     # Training loop
     for _ in range(100):
+        time.sleep(0.1)
         optimizer.zero_grad()
         y_pred = model.forward(X_train)
         acc = (y_pred.argmax(dim=1) == y_train).float().mean()
@@ -67,3 +69,6 @@ def test_example():
     assert board.operators['Optimizer'].optim is optimizer
     assert board.model is model
     assert accuracies == [i['acc'] for i in board.history.history if 'acc' in i]
+
+if __name__ == '__main__':
+    test_example()

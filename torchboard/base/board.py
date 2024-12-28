@@ -4,6 +4,7 @@ from torch.nn import Module
 from torch.optim import Optimizer
 from .utils import _SUPPORTED, History
 from torchboard.operations.optim import OptimizerOperator
+from torchboard.server.torchboard_server import TorchBoardServer
 
 # TODO: Add documentation
 class Board:
@@ -16,6 +17,9 @@ class Board:
         self.optim: Optional[Optimizer]
         self.history: History = History()
         self.operators: Dict[str, Any] = {}
+        
+        self.server = TorchBoardServer()
+        self.server.start()
 
     def update(self, **kwargs):
         """ Update arguments """
@@ -23,6 +27,7 @@ class Board:
         changes = {arg_name: float(kwargs[arg_name])
                    for arg_name, arg_type in parsed.items() if arg_type in ['Value']}
         self.history.update(changes)
+        self.server.add_listener_variables(changes)
 
     def _argument_parser(self, kwargs: Dict[str, Any]) -> Dict[str, _SUPPORTED]:
         parsed: Dict[str, _SUPPORTED] = {arg_name: Board._match_argument(
