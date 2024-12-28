@@ -10,17 +10,33 @@ from threading import Thread
 import os
 from torchboard.server.utils import wipe_dir, transform_history_dict
 
-from typing import Any, List
+from typing import Any, Iterable, List
 import logging
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
+
+def type_mapping(value:Any) -> str:
+    if isinstance(value, bool):
+        return 'bool'
+    elif isinstance(value, int):
+        return 'int'
+    elif isinstance(value, float):
+        return 'float'
+    elif isinstance(value, Iterable):
+        if isinstance(value[0], int):
+            return 'list_int'
+        elif isinstance(value[0], float):
+            return 'list_float'
+        else:
+            return 'list'
+    else:
+        return 'unknown'
 
 class TorchBoardServer():
     port:int
     host:str
     static_path:str
-    
-    listener_state:dict[str, List[Any]]
+
     variable_state:dict[str, Any]
     
     app:flask.Flask
@@ -88,7 +104,9 @@ class TorchBoardServer():
     
     @cross_origin()
     def __get_variables(self) -> flask.Response:
-        return flask.jsonify({key:value for key,value in self.variable_state.items()}),200
+        variables = [{'name':key,'value':value,'type':type_mapping(value)}
+         for key, value in self.variable_state.items()]
+        return flask.jsonify(variables),200
     
     @cross_origin()
     def __update_variable(self) -> flask.Response:
