@@ -28,7 +28,6 @@ class Board:
         listener_changes = {arg_name: float(kwargs[arg_name])
                    for arg_name, arg_type in parsed.items() if arg_type in ['Value']}
         self.history.update(listener_changes)
-        self.server.update_observed_values(listener_changes)
         
         for k,v in self.server.get_changeable_values().items():
             if k.startswith('optim_'):

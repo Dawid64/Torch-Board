@@ -3,15 +3,14 @@ from flask_cors import CORS, cross_origin
 from flask_session import Session
 from werkzeug.serving import make_server
 
-from threading import Thread, Event
-
 import webbrowser
 
-from typing import Any, List
+from threading import Thread
 
 import os
-from torchboard.server.utils import wipe_dir
+from torchboard.server.utils import wipe_dir, transform_history_dict
 
+from typing import Any, List
 import logging
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
@@ -29,8 +28,8 @@ class TorchBoardServer():
     def __init__(self, port:int=8080, host:str='127.0.0.1', name:str='TorchBoard', static_path:str='static', board:Any=None) -> None:
         self.port = port
         self.host = host
-    
-        self.listener_state = dict()
+        self.static_path = static_path        
+        
         self.variable_state = dict()
         
         self.app = flask.Flask(name)
@@ -45,11 +44,11 @@ class TorchBoardServer():
 
         @self.app.route('/')
         def index():
-            return flask.send_from_directory('static', 'index.html')
+            return flask.send_from_directory(self.static_path, 'index.html')
         
         @self.app.route('/<path:path>')
         def static_proxy(path):
-            return flask.send_from_directory('static', path)
+            return flask.send_from_directory(self.static_path, path)
         
         self.app.add_url_rule('/get_changes','get_changes', self.__get_changes_session, methods=['GET'])
         self.app.add_url_rule('/get_history','get_history', self.__get_history, methods=['GET'])
@@ -62,23 +61,12 @@ class TorchBoardServer():
     @cross_origin()
     def __get_changes_session(self) -> flask.Response:
         changes_list = self.board.history.get_since_last_change()
-        if len(changes_list) == 0:
-            return flask.jsonify({}),200
-        keys = set(changes_list[0].keys())
-        for change in changes_list[1:]:
-            keys = keys.union(set(change.keys()))
-        changes = {key: [item[key] for item in changes_list if key in item] for key in keys}
-        return flask.jsonify(changes),200
+        return flask.jsonify(transform_history_dict(changes_list)),200
 
     @cross_origin()
     def __get_history(self) -> flask.Response:
-        ret = dict()
-        for key in self.listener_state:
-            ret[key] = self.listener_state[key]
-            if not 'history_indexes' in flask.session:
-                flask.session['history_indexes'] = dict()
-            flask.session['history_indexes'][key] = len(self.listener_state[key])
-        return flask.jsonify(ret),200
+        history_list = self.board.history.get_all()
+        return flask.jsonify(transform_history_dict(history_list)),200
     
     @cross_origin()
     def __get_variables(self) -> flask.Response:
@@ -87,17 +75,15 @@ class TorchBoardServer():
     @cross_origin()
     def __update_variable(self) -> flask.Response:
         data = flask.request.json
-        
-        if not 'name' in data or not 'value' in data:
+        if any([key not in data for key in ['name','value']]):
             return flask.jsonify({'status': 'error', 'message': 'Invalid request'}),400
-        
-        name = data['name']
-        value = data['value']
+            
+        name,value = data['name'],data['value']
         
         if not name in self.variable_state:
             return flask.jsonify({'status': 'error', 'message': f'Variable {name} not found'}),404
             
-        self.update_variable(name, value)
+        self.update_changeable_value(name, value)
         return flask.jsonify({'status': 'success'}),200
     
     def start(self, start_browser=False) -> None:
@@ -115,22 +101,7 @@ class TorchBoardServer():
     
     def stop(self) -> None:
         self.__flask_process.join()
-        self.__flask_process = None
-        
-    def update_observed_value(self, name:str, value:Any) -> None:
-        if name not in self.listener_state:
-            self.listener_state[name] = []
-        self.listener_state[name].append(value)
-    
-    def update_observed_values(self, variables:dict[str, Any]) -> None:
-        for key, value in variables.items():
-            self.update_observed_value(key, value)
-    
-    def get_observed_value_history(self, name:str) -> List[Any] | None:
-        if name in self.listener_state:
-            return self.listener_state[name]
-        else:
-            return None        
+        self.__flask_process = None     
         
     def register_changeable_value(self,name:str,default_value:Any) -> None:
         self.variable_state[name] = default_value
