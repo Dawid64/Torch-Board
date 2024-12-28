@@ -31,7 +31,6 @@ class Board:
                    for arg_name, arg_type in parsed.items() if arg_type in ['Value']}
         
         if len(listener_changes) > 0:
-            print("Updating listener")
             self.history.update(listener_changes)
         
         while not self.do_training:
@@ -40,11 +39,11 @@ class Board:
     def update_variable(self, name: str, value: Any):
         if name.startswith('optim_'):
             self.operators['Optimizer'].update_parameters(name[6:], value)
+        self.server.update_changeable_value(name, value)
         #TODO update other variables
     
     def toggle_training(self):
         self.do_training = not self.do_training
-        print(f'Training is now {"on" if self.do_training else "off"}')
         
     def save_model(self):
         torch.save(self.model, 'model.pth')

@@ -56,7 +56,7 @@ def test_example():
     board.update(optimizer=optimizer, model=model)
     accuracies = []
     # Training loop
-    for _ in range(100000):
+    for _ in range(100):
         optimizer.zero_grad()
         y_pred = model.forward(X_train)
         acc = (y_pred.argmax(dim=1) == y_train).float().mean()

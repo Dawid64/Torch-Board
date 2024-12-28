@@ -102,7 +102,7 @@ class TorchBoardServer():
         if not name in self.variable_state:
             return flask.jsonify({'status': 'error', 'message': f'Variable {name} not found'}),404
             
-        self.update_changeable_value(name, value)
+        self.board.update_variable(name, value)
         return flask.jsonify({'status': 'success'}),200
     
     @cross_origin()
