@@ -39,8 +39,8 @@ def train(model, x_train, y_train, x_val, y_val, epochs=100, lr=0.01):
     acc = []
     board.update(optimizer=optimizer, model=model, criterion=criterion)
     print(board.criterion)
-    model.train()
     for epoch in range(epochs):
+        model.train()
         optimizer.zero_grad()
         y_pred = model.forward(x_train)
         acc = (y_pred.argmax(dim=1) == y_train).float().mean()
@@ -55,6 +55,7 @@ def train(model, x_train, y_train, x_val, y_val, epochs=100, lr=0.01):
 def validate(model, x_val, y_val, criterion):
     model.eval()
     y_pred = model.forward(x_val)
+    # TODO should it be called twice as it's already caleed in the for epoch loop in train, and it updates board twice 
     loss = criterion(y_pred, y_val)
     print(f"Validation loss: {loss.item()} \n")
 

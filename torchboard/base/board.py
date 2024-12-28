@@ -23,6 +23,7 @@ class Board:
 
     def update(self, **kwargs):
         """ Update arguments """
+
         parsed = self._argument_parser(kwargs)
         changes = {arg_name: float(kwargs[arg_name])
                    for arg_name, arg_type in parsed.items() if arg_type in ['Value']}
@@ -43,7 +44,7 @@ class Board:
             self.model = model
         if 'Criterion' in reverse_parsing:
             criterion = reverse_parsing['Criterion']
-            self.criterion = overwrite_criterion_loss_update(criterion=criterion, func=self.update)
+            self.criterion = overwrite_criterion_loss_update(criterion, self.update, self)
         return parsed
 
     @staticmethod

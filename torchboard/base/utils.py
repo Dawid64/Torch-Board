@@ -1,5 +1,6 @@
 from typing import Dict, List, Literal, Union
 from torch.nn.modules.loss import _Loss
+# from torchboard import Board
 
 
 _SUPPORTED = Literal['Model', 'Optimizer', 'List', 'Value']
@@ -26,11 +27,14 @@ class History:
         return self.history
     
 
-def overwrite_criterion_loss_update(criterion: _Loss, func: callable) -> _Loss:
+def overwrite_criterion_loss_update(criterion: _Loss, func: callable, board) -> _Loss:
     criterion.base_forward = criterion.forward
     def forward(*args, **kwargs):
         loss = criterion.base_forward(*args, **kwargs)
-        func(loss=loss)
+        if  board.model and  board.model.training:
+            func(criterion_train=loss)
+        else:
+            func(criterion_eval=loss)
         return loss
     criterion.forward = forward    
     return criterion
