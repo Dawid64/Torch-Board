@@ -35,7 +35,6 @@ class TorchBoardServer():
         
         self.app = flask.Flask(name)
         self.__flask_process = None
-        self.__stop_event = Event()
         
         self.app.config["SECRET_KEY"] = "duparomana123" #TODO: Change secret key
         self.app.config['SESSION_TYPE'] = 'filesystem'
@@ -101,7 +100,7 @@ class TorchBoardServer():
         self.update_variable(name, value)
         return flask.jsonify({'status': 'success'}),200
     
-    def start(self) -> None:
+    def start(self, start_browser=False) -> None:
         if self.__flask_process:
             return
         self.__flask_process = Thread(target=self.server.serve_forever)
@@ -110,8 +109,9 @@ class TorchBoardServer():
         
         if os.path.exists('flask_session'):
             wipe_dir('flask_session')
-            
-        webbrowser.open(f'http://{self.host}:{self.port}') #Force open browser to dashboard
+        
+        if start_browser:
+            webbrowser.open(f'http://{self.host}:{self.port}') #Force open browser to dashboard
     
     def stop(self) -> None:
         if not self.__flask_process:
@@ -122,7 +122,6 @@ class TorchBoardServer():
         self.__flask_process.join()
         self.__flask_process = None
         
-    
     def add_listener_variable(self, name:str, value:Any) -> None:
         if name not in self.listener_state:
             self.listener_state[name] = []
