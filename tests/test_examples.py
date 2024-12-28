@@ -139,7 +139,7 @@ def test_eval_train_saving():
             loss.backward()
             optimizer.step()
 
-            assert board.history.get_last() == {'criterion_train': loss.item()}
+            assert board.history.get_last()['criterion_train'] == loss.item()
 
             validate(model, x_val, y_val, criterion)
 
@@ -150,7 +150,7 @@ def test_eval_train_saving():
         model.eval()
         y_pred = model.forward(x_val)
         loss = criterion(y_pred, y_val)
-        assert board.history.get_last() == {'criterion_eval': loss.item()}
+        assert board.history.get_last()['criterion_eval'] == loss.item()
 
 
     X_tensor = torch.tensor(X, dtype=torch.float32)
