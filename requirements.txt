@@ -1,3 +1,6 @@
+torch
+scikit-learn # just for examples
+
 #backend
 flask
 flask_cors
