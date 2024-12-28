@@ -55,7 +55,8 @@ class TorchBoardServer():
         self.app.add_url_rule('/get_variables','get_variables', self.__get_variables, methods=['GET'])
         self.app.add_url_rule('/update_variable','update_variable', self.__update_variable, methods=['PUT'])
         
-        self.server = make_server(self.host, self.port, self.app)
+        self.server = make_server(self.host, self.port, self.app, threaded=True)
+        self.server.daemon_threads = True
         
     @cross_origin()
     def __get_changes_session(self) -> flask.Response:
@@ -114,11 +115,6 @@ class TorchBoardServer():
             webbrowser.open(f'http://{self.host}:{self.port}') #Force open browser to dashboard
     
     def stop(self) -> None:
-        if not self.__flask_process:
-            return
-        print('Stopping server')
-        self.server.shutdown()
-        print('Server stopped')
         self.__flask_process.join()
         self.__flask_process = None
         
@@ -151,21 +147,3 @@ class TorchBoardServer():
     
     def get_variables(self) -> dict[str, Any]:
         return {k:v for k,v in self.variable_state.items()}
-    
-'''     
-if __name__ == '__main__':
-    import time
-    server = TorchBoardServer(static_path='../../static')
-    server.register_variable('test_int', 2137)
-    server.register_variable('test_str', 'Hello')
-    server.register_variable('test_float', 0.534)
-    server.start()
-    try:
-        i = 1
-        while True:
-            server.add_listener_variables({"accuracy":-(1/i)+1,"loss":1/i*5})
-            i+=1
-            time.sleep(1)
-    except KeyboardInterrupt:
-        server.stop()
-'''

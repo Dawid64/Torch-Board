@@ -70,5 +70,5 @@ def test_example():
     assert board.model is model
     assert accuracies == [i['acc'] for i in board.history.history if 'acc' in i]
 
-if __name__ == '__main__':
+if __name__ == '__main__': 
     test_example()
