@@ -3,3 +3,6 @@ torch
 
 # For examples
 scikit-learn
+pandas
+numpy
+cv2
