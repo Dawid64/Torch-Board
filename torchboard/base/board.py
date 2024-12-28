@@ -20,10 +20,12 @@ class Board:
         self.optim: Optional[Optimizer]
         self.criterion: Optional[_Loss]
         self.history: History = History()
-        self.operators: Dict[str, Any] = {}
+        self.optim_operator: Optional[OptimizerOperator]
         
         self.server = TorchBoardServer(board=self)
         self.server.start()
+        
+        self.do_training = True
 
     def update(self, **kwargs):
         """ Update arguments """
@@ -32,16 +34,24 @@ class Board:
         
         listener_changes = {arg_name: float(kwargs[arg_name])
                    for arg_name, arg_type in parsed.items() if arg_type in ['Value']}
-        self.history.update(listener_changes)
         
-        for k,v in self.server.get_changeable_values().items():
-            if k.startswith('optim_'):
-                old_v = self.operators["Optimizer"].get_parameter_value(k[6:])
-                if old_v != v:
-                    self.operators['Optimizer'].update_parameters(k[6:], v)
-                    print(self.operators["Optimizer"].get_parameter_value(k[6:]))
-                
+        if len(listener_changes) > 0:
+            self.history.update(listener_changes)
         
+        while not self.do_training:
+            pass #Is this the best way to do this?        
+        
+    def update_variable(self, name: str, value: Any):
+        if name.startswith('optim_'):
+            self.optim_operator.update_parameters(name[6:], value)
+        self.server.update_changeable_value(name, value)
+        #TODO update other variables
+    
+    def toggle_training(self):
+        self.do_training = not self.do_training
+        
+    def save_model(self):
+        torch.save(self.model, 'model.pth')
 
     def _argument_parser(self, kwargs: Dict[str, Any]) -> Dict[str, _SUPPORTED]:
         parsed: Dict[str, _SUPPORTED] = {arg_name: Board._match_argument(
@@ -49,14 +59,9 @@ class Board:
         reverse_parsing: Dict[_SUPPORTED, Any] = {Board._match_argument(
             arg): kwargs[arg_name] for arg_name, arg in kwargs.items()}
         if 'Optimizer' in reverse_parsing:
-            optim = reverse_parsing['Optimizer']
+            optim: Optimizer = reverse_parsing['Optimizer']
             optim_operator = OptimizerOperator.get_optimizer(optim)
-            
-            for k,v in optim_operator.get_parameters().items():
-                optim_value = optim.param_groups[0][k]
-                self.server.register_changeable_value(f"optim_{k}", optim_value)
-            
-            self.operators['Optimizer'] = optim_operator
+            self.optim_operator = optim_operator
             self.optim = optim
         if 'Model' in reverse_parsing:
             model = reverse_parsing['Model']
