@@ -34,11 +34,12 @@ class Classifier(nn.Module):
         return x
 
 
-def test_example():
-    iris = datasets.load_iris()
-    X = iris.data
-    y = iris.target
+iris = datasets.load_iris()
+X = iris.data
+y = iris.target
 
+
+def test_example():
     X_tensor = torch.tensor(X, dtype=torch.float32)
     y_tensor = torch.tensor(y, dtype=torch.long)
 
@@ -69,3 +70,49 @@ def test_example():
     assert board.operators['Optimizer'].optim is optimizer
     assert board.model is model
     assert accuracies == [i['acc'] for i in board.history.history if 'acc' in i]
+
+
+
+
+def test_eval_train_saving():
+    def train(model, x_train, y_train, x_val, y_val, epochs=2, lr=0.01):
+        optimizer = optim.Adam(model.parameters(), lr=lr)
+        criterion = nn.CrossEntropyLoss()
+        nn.HuberLoss
+        acc = []
+        board.update(optimizer=optimizer, model=model, criterion=criterion)
+        print(board.criterion)
+        for epoch in range(epochs):
+            model.train()
+            optimizer.zero_grad()
+            y_pred = model.forward(x_train)
+            acc = (y_pred.argmax(dim=1) == y_train).float().mean()
+            loss = criterion(y_pred, y_train)
+            loss.backward()
+            optimizer.step()
+
+            assert board.history.get_last() == {'criterion_train': loss.item()}
+
+            validate(model, x_val, y_val, criterion)
+
+
+
+    @torch.no_grad()
+    def validate(model, x_val, y_val, criterion):
+        model.eval()
+        y_pred = model.forward(x_val)
+        loss = criterion(y_pred, y_val)
+        assert board.history.get_last() == {'criterion_eval': loss.item()}
+
+
+    X_tensor = torch.tensor(X, dtype=torch.float32)
+    y_tensor = torch.tensor(y, dtype=torch.long)
+
+    X_train, X_val, y_train, y_val = train_test_split(
+        X_tensor, y_tensor, test_size=0.2, random_state=42
+    )
+
+    model = Classifier(input_features=4, output_classes=3)
+
+    train(model, X_train, y_train, X_val, y_val, epochs=2, lr=0.01)
+
