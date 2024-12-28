@@ -5,14 +5,19 @@ from torch.optim import Optimizer
 _SUPPORTED = Literal['Model', 'Optimizer', 'List', 'Value']
 _RESPONSE = Dict[str, Union[int, float]]
 
-
+# TODO: Add documentation
 class Board:
+    """
+    
+    
+    """
     def __init__(self):
         self.model: Optional[Module]
         self.optim: Optional[Optimizer]
         self.history: List[_RESPONSE]
 
     def update(self, **kwargs):
+        """ Update arguments """
         parsed = self._argument_parser(kwargs)
         changes = {arg_name: kwargs[arg_name]
                    for arg_name, arg_type in parsed.items() if arg_type in ['Value']}
