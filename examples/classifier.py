@@ -49,7 +49,7 @@ def train(model, x_train, y_train, x_val, y_val, epochs=100, lr=0.01):
         optimizer.step()
         sleep(0.1)
         print(f"Epoch {epoch} loss: {loss.item()} accuracy: {acc}")
-        board.update(acc=acc, acc2=acc)
+        board.update(acc=acc, acc2=acc - 0.2)
         validate(model, x_val, y_val, criterion)
     sleep(10)
 
