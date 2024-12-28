@@ -4,8 +4,6 @@ import torch.optim as optim
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
 from torchboard import board
-from time import sleep
-
 class Classifier(nn.Module):
     def __init__(self, input_features=10, output_classes=5):
         super(Classifier, self).__init__()
@@ -35,34 +33,31 @@ class Classifier(nn.Module):
 
 
 def train(model, x_train, y_train, x_val, y_val, epochs=100, lr=0.01):
-    optimizer = optim.Adam(model.parameters(), lr=lr, betas=(0.9, 0.999))
+    optimizer = optim.Adam(model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss()
     nn.HuberLoss
     acc = []
     board.update(optimizer=optimizer, model=model, criterion=criterion)
     print(board.criterion)
-    model.train()
-    board.update(optimizer=optimizer)
     for epoch in range(epochs):
+        model.train()
         optimizer.zero_grad()
         y_pred = model.forward(x_train)
         acc = (y_pred.argmax(dim=1) == y_train).float().mean()
         loss = criterion(y_pred, y_train)
         loss.backward()
         optimizer.step()
-        sleep(0.1)
         print(f"Epoch {epoch} loss: {loss.item()} accuracy: {acc}")
-        board.update(acc=acc, acc2=acc - 0.2)
         validate(model, x_val, y_val, criterion)
-    sleep(10)
 
 
 @torch.no_grad()
 def validate(model, x_val, y_val, criterion):
     model.eval()
     y_pred = model.forward(x_val)
+    # TODO should it be called twice as it's already caleed in the for epoch loop in train, and it updates board twice 
     loss = criterion(y_pred, y_val)
-    print(f"Validation loss: {loss.item()}")
+    print(f"Validation loss: {loss.item()} \n")
 
 
 if __name__ == "__main__":
@@ -79,4 +74,4 @@ if __name__ == "__main__":
 
     model = Classifier(input_features=4, output_classes=3)
 
-    train(model, X_train, y_train, X_val, y_val, epochs=50, lr=0.01)
+    train(model, X_train, y_train, X_val, y_val, epochs=15, lr=0.01)

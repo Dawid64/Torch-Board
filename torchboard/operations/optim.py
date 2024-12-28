@@ -11,13 +11,13 @@ class OptimizerOperator:
         raise NotImplementedError("Optimizer not selected")
     
     def get_current_parameters(self) -> Dict[str, Any]:
-        return {parameter: getattr(self.optim, parameter) for parameter in self.parameters}
+        return {k: self.optim.param_groups[0][k] for k in self.get_parameters()}
 
     def update_parameters(self, parameter: str, value: Any):
         assert parameter in self.parameters, f"Parameter {parameter} not found in {self.optim.__class__.__name__}"
         for group in self.optim.param_groups:
             group[parameter] = value
-            
+
     def get_parameter_value(self, parameter: str) -> Any:
         return self.optim.param_groups[0][parameter]
 
