@@ -14,10 +14,10 @@ Torchboard is a powerful library for real-time neural network modification and m
 
 ## Installation
 
-Install Decorators via pip:
+Install Torch-Board via pip:
 
 ```bash
-pip install decorify 
+pip install torchboard 
 ```
 
 
