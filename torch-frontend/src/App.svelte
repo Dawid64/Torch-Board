@@ -152,7 +152,7 @@
   // Funkcja obsługująca request do backendu
   async function fetchDataAndAddToChart() {
     try {
-      const response = await fetch('http://localhost:3000/api/data'); // Zmień URL na swój endpoint
+      const response = await fetch('http://127.0.0.1:8080/get_changes'); // Zmień URL na swój endpoint
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

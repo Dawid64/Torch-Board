@@ -4,7 +4,7 @@ import torch.optim as optim
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
 from torchboard import board
-
+from time import sleep
 
 class Classifier(nn.Module):
     def __init__(self, input_features=10, output_classes=5):
@@ -46,9 +46,11 @@ def train(model, x_train, y_train, x_val, y_val, epochs=100, lr=0.01):
         loss = criterion(y_pred, y_train)
         loss.backward()
         optimizer.step()
+        sleep(0.1)
         print(f"Epoch {epoch} loss: {loss.item()} accuracy: {acc}")
         board.update(acc=acc, optimizer=optimizer)
         validate(model, x_val, y_val, criterion)
+    sleep(10)
 
 
 @torch.no_grad()
