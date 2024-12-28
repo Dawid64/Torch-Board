@@ -18,7 +18,7 @@ class Board:
         self.history: History = History()
         self.operators: Dict[str, Any] = {}
         
-        self.server = TorchBoardServer()
+        self.server = TorchBoardServer(board=self)
         self.server.start()
 
     def update(self, **kwargs):

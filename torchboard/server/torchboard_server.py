@@ -26,7 +26,7 @@ class TorchBoardServer():
     
     app:flask.Flask
     
-    def __init__(self, port:int=8080, host:str='127.0.0.1', name:str='TorchBoard', static_path:str='static') -> None:
+    def __init__(self, port:int=8080, host:str='127.0.0.1', name:str='TorchBoard', static_path:str='static', board:Any=None) -> None:
         self.port = port
         self.host = host
     
@@ -41,6 +41,7 @@ class TorchBoardServer():
         
         CORS(self.app, resources={r"/*": {"origins": "*"}}) #TODO: Change origins to specific domain
         Session(self.app)
+        self.board = board
 
         @self.app.route('/')
         def index():
@@ -60,15 +61,13 @@ class TorchBoardServer():
         
     @cross_origin()
     def __get_changes_session(self) -> flask.Response:
-        history_indexes = flask.session.get('history_indexes', dict())
-        changes = dict()
-        for key,history in self.listener_state.items():
-            idx = history_indexes.get(key, 0)
-            updates = history[idx:]
-            if updates:
-                changes[key] = updates
-                history_indexes[key] = len(history)
-        flask.session['history_indexes'] = history_indexes
+        changes_list = self.board.history.get_since_last_change()
+        if len(changes_list) == 0:
+            return flask.jsonify({}),200
+        keys = set(changes_list[0].keys())
+        for change in changes_list[1:]:
+            keys = keys.union(set(change.keys()))
+        changes = {key: [item[key] for item in changes_list if key in item] for key in keys}
         return flask.jsonify(changes),200
 
     @cross_origin()
