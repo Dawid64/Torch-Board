@@ -5,6 +5,8 @@ from torch.optim import Optimizer
 from .utils import _SUPPORTED, History
 from torchboard.operations.optim import OptimizerOperator
 
+from torch.nn.modules.loss import _Loss 
+
 # TODO: Add documentation
 class Board:
     """
@@ -14,6 +16,7 @@ class Board:
     def __init__(self):
         self.model: Optional[Module]
         self.optim: Optional[Optimizer]
+        self.criterion: Optional[_Loss]
         self.history: History = History()
         self.operators: Dict[str, Any] = {}
 
@@ -37,10 +40,21 @@ class Board:
         if 'Model' in reverse_parsing:
             model = reverse_parsing['Model']
             self.model = model
+        if 'Criterion' in reverse_parsing:
+            criterion = reverse_parsing['Criterion']
+            criterion.base_forward = criterion.forward
+            def forward(*args, **kwargs):
+                loss = criterion.base_forward(*args, **kwargs)
+                self.update(loss=loss)
+                return loss
+            criterion.forward = forward    
+            self.criterion = criterion
         return parsed
 
     @staticmethod
     def _match_argument(argument: Any) -> _SUPPORTED:
+        if isinstance(argument, _Loss):
+            return 'Criterion'
         if isinstance(argument, Module):
             return 'Model'
         elif isinstance(argument, Optimizer):
