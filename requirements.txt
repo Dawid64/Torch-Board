@@ -1,2 +1,5 @@
+# Main library
 torch
-scikit-learn # just for examples
+
+# For examples
+scikit-learn
