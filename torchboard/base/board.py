@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Optional, Union
+import torch
 from torch.nn import Module
 from torch.optim import Optimizer
 from .utils import _SUPPORTED, History
@@ -10,7 +11,6 @@ class Board:
     
     
     """
-
     def __init__(self):
         self.model: Optional[Module]
         self.optim: Optional[Optimizer]
@@ -20,7 +20,7 @@ class Board:
     def update(self, **kwargs):
         """ Update arguments """
         parsed = self._argument_parser(kwargs)
-        changes = {arg_name: kwargs[arg_name]
+        changes = {arg_name: float(kwargs[arg_name])
                    for arg_name, arg_type in parsed.items() if arg_type in ['Value']}
         self.history.update(changes)
 
@@ -28,13 +28,14 @@ class Board:
         parsed: Dict[str, _SUPPORTED] = {arg_name: Board._match_argument(
             arg) for arg_name, arg in kwargs.items()}
         reverse_parsing: Dict[_SUPPORTED, Any] = {Board._match_argument(
-            arg): arg_name for arg_name, arg in kwargs.items()}
-        if 'Optimizer' in parsed:
-            optim = parsed[reverse_parsing['Optimizer']]
+            arg): kwargs[arg_name] for arg_name, arg in kwargs.items()}
+        if 'Optimizer' in reverse_parsing:
+            optim = reverse_parsing['Optimizer']
             optim_operator = OptimizerOperator.get_optimizer(optim)
             self.operators['Optimizer'] = optim_operator
-        if 'Model' in parsed:
-            model = parsed[reverse_parsing['Model']]
+            self.optim = optim
+        if 'Model' in reverse_parsing:
+            model = reverse_parsing['Model']
             self.model = model
         return parsed
 
@@ -46,7 +47,7 @@ class Board:
             return 'Optimizer'
         elif isinstance(argument, List):
             return 'List'
-        elif isinstance(argument, Union[int, float]):
+        elif isinstance(argument, Union[int, float,torch.Tensor]):
             return 'Value'
         else:
             raise NotImplementedError(
