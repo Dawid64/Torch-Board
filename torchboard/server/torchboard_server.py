@@ -57,7 +57,6 @@ class TorchBoardServer():
         self.app.add_url_rule('/update_variable','update_variable', self.__update_variable, methods=['PUT'])
         self.app.add_url_rule('/do_action','do_action', self.__do_action, methods=['POST'])
         
-
         self.server = make_server(self.host, self.port, self.app, threaded=True)
         self.server.daemon_threads = True
     
