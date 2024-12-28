@@ -310,7 +310,7 @@ onDestroy(() => {
   </section>
 
   <section class="form-section">
-    <h2>Select, Slider, and Submit Example</h2>
+    <h2 style="color:orange">Change Hyperparameters</h2>
 
     <!-- Select lista -->
   <label for="select">Select an element:</label>
