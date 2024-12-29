@@ -1,8 +1,8 @@
 # Torch-Board
 
 
-[![PyPI - Downloads](https://img.shields.io/pypi/dm/torchboard)](https://pypi.org/project/decorify/)
-[![PyPI Latest Release](https://img.shields.io/pypi/v/torchboard.svg)](https://pypi.org/project/decorify/)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/torchboard)](https://pypi.org/project/torchboard/)
+[![PyPI Latest Release](https://img.shields.io/pypi/v/torchboard.svg)](https://pypi.org/project/torchboard/)
 ![CI - Test](https://github.com/Dawid64/Torch-Board/actions/workflows/python-app.yml/badge.svg)
 <!-- [![GitHub Pages Documentation](https://img.shields.io/badge/GitHub_Pages-Documentation-blue)](https://dawid64.github.io/Torch-Board) -->
 
