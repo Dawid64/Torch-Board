@@ -43,6 +43,7 @@ class TorchBoardServer():
     app:flask.Flask
     
     def __init__(self, port:int=8080, host:str='127.0.0.1', name:str='TorchBoard', static_path:str='torchboard/dist', board:Any=None) -> None:
+        static_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'dist')
         from torchboard.base.board import Board
         self.port = port
         self.host = host
