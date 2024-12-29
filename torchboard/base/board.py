@@ -12,8 +12,7 @@ from torch.nn.modules.loss import _Loss
 # TODO: Add documentation
 class Board:
     """
-    
-    
+    Main board class to create a web interface to manage and interact with the training process.
     """
     def __init__(self):
         self.model: Optional[Module]
