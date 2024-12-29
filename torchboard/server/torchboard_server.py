@@ -88,6 +88,7 @@ class TorchBoardServer():
         if os.path.exists('flask_session'):
             wipe_dir('flask_session')
         
+        print(f'Started TorchBoard server at http://{self.host}:{self.port}')
         if start_browser:
             webbrowser.open(f'http://{self.host}:{self.port}') #Force open browser to dashboard
     
