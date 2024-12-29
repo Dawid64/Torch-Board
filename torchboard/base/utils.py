@@ -30,7 +30,8 @@ class History:
         """
         last_change = {}
         for key, value in self.history.items():
-            if self.last_indexes[key] < len(value):
+            #TODO fix this
+            if key in self.last_indexes and self.last_indexes[key] < len(value):
                 last_change[key] = value[self.last_indexes[key]:]   
                 self.last_indexes[key] = len(value)
 

@@ -72,7 +72,6 @@ def test_example():
 
         board.update(acc=acc)
         accuracies.append(float(acc))
-        time.sleep(0.1)
     assert board.model is model
     assert accuracies ==  board.history.history['acc']
 
