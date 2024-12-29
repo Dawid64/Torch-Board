@@ -162,7 +162,7 @@ def test_eval_train_saving():
 
     model = Classifier(input_features=4, output_classes=3)
 
-    train(model, X_train, y_train, X_val, y_val, epochs=2, lr=0.01)
+    train(model, X_train, y_train, X_val, y_val, epochs=50, lr=0.01)
 
 
 if __name__ == '__main__': 

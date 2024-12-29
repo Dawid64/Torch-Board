@@ -4,6 +4,11 @@ import torch.nn as nn
 from torchvision import transforms as T
 from torch.utils.data import DataLoader
 from torchvision import models, datasets
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from torchboard import board
+
 
 seed = 42
 np.random.seed(seed)
