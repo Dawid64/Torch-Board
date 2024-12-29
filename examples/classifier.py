@@ -3,8 +3,12 @@ import torch.nn as nn
 import torch.optim as optim
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
-from torchboard import board
 from time import sleep
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from torchboard import board
+
 
 class Classifier(nn.Module):
     def __init__(self, input_features=10, output_classes=5):
@@ -37,12 +41,10 @@ class Classifier(nn.Module):
 def train(model, x_train, y_train, x_val, y_val, epochs=100, lr=0.01):
     optimizer = optim.Adam(model.parameters(), lr=lr, betas=(0.9, 0.999))
     criterion = nn.CrossEntropyLoss()
-    nn.HuberLoss
-    acc = []
+    # That is pretty much all you have to do to get the board running :)
     board.update(optimizer=optimizer, model=model, criterion=criterion)
-    print(board.criterion)
+    acc = []
     model.train()
-    board.update(optimizer=optimizer)
     for epoch in range(epochs):
         optimizer.zero_grad()
         y_pred = model.forward(x_train)
@@ -51,7 +53,7 @@ def train(model, x_train, y_train, x_val, y_val, epochs=100, lr=0.01):
         loss.backward()
         optimizer.step()
         sleep(0.1)
-        print(f"Epoch {epoch} loss: {loss.item()} accuracy: {acc}")
+        print(f"Epoch {epoch} loss: {loss.item()} accuracy: {acc}", end="\t")
         board.update(acc=acc, acc2=acc - 0.2)
         validate(model, x_val, y_val, criterion)
     sleep(10)

@@ -3,7 +3,10 @@ import torch.nn as nn
 import torch.optim as optim
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
-
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from torchboard import board
 
 class Regressor(nn.Module):
     def __init__(self, input_features=10):
@@ -50,8 +53,9 @@ class DiabetesDataset(torch.utils.data.Dataset):
 
 
 def train(model, train_loader, val_loader, epochs=100, lr=0.01):
-    optimizer = optim.Rprop(model.parameters(), lr=lr, step_sizes=(1e-6, 50))
+    optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.7)
     criterion = nn.MSELoss()
+    board.update(optimizer=optimizer, model=model, criterion=criterion)
     model.train()
     for epoch in range(epochs):
         for batch in train_loader:
@@ -61,6 +65,7 @@ def train(model, train_loader, val_loader, epochs=100, lr=0.01):
             loss = criterion(y_pred, y)
             loss.backward()
             optimizer.step()
+            
             print(f"Epoch {epoch} loss: {loss.item()}")
         for batch in val_loader:
             X, y = batch
@@ -109,4 +114,4 @@ if __name__ == "__main__":
 
     model = Regressor(input_features=10)
 
-    train(model, train_loader, val_loader, epochs=50, lr=0.01)
+    train(model, train_loader, val_loader, epochs=500, lr=0.0005)

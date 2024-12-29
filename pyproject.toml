@@ -4,7 +4,14 @@ version = "0.1.1"
 description = "Python dashboard application adding interactivity into your pytorch model"
 readme = "README.md"
 repository = "https://github.com/Dawid64/Torch-Board"
-authors = ["Dawid Siera <dawid.siera@gmail.com>", "Julian Mikołajczak <mikolajczak.julian@gmail.com>", "Anatol Kaczmarek <anatol.kaczmarek@gmail.com>", "Jakub Jagła <jakub.jagla01@gmail.com>"]
+authors = ["Dawid Siera <dawid.siera@gmail.com>", "Julian Mikołajczak <mikolajczak.julian@gmail.com>", "Anatol Kaczmarek <anatol.kaczmarek@gmail.com>", "Jakub Jagła <jakub.jagla01@gmail.com>", "Paulina Paszkowiak <paulinap55p@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.9"
+torch = "^2.5.1"
+flask = "^3.1.0"
+flask-cors = "^5.0.0"
+flask-session = "0.5.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.4"
