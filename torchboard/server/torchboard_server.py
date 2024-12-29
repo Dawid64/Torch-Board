@@ -1,6 +1,5 @@
 import flask
 from flask_cors import CORS, cross_origin
-from flask_session import Session
 from werkzeug.serving import make_server
 import secrets
 
@@ -9,9 +8,9 @@ import webbrowser
 from threading import Thread
 
 import os
-from torchboard.server.utils import wipe_dir, transform_history_dict
 
-from typing import Any, Iterable, List
+from typing import Any, Iterable
+
 import logging
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
@@ -56,10 +55,8 @@ class TorchBoardServer():
         self.__flask_process = None
         
         self.app.config["SECRET_KEY"] = secrets.token_urlsafe(16)
-        self.app.config['SESSION_TYPE'] = 'filesystem'
 
         CORS(self.app, resources={r"/*": {"origins": "*"}}) #TODO: Change origins to specific domain
-        Session(self.app)
 
         @self.app.route('/')
         def index():
@@ -85,9 +82,6 @@ class TorchBoardServer():
         self.__flask_process = Thread(target=self.server.serve_forever)
         self.__flask_process.daemon = True
         self.__flask_process.start()
-        
-        if os.path.exists('flask_session'):
-            wipe_dir('flask_session')
         
         print(f'Started TorchBoard server at http://{self.host}:{self.port}')
         if start_browser:
@@ -136,7 +130,6 @@ class TorchBoardServer():
         action = data['action']
         match action:
             case 'toggle_training':
-                
                 self.board.toggle_training()
                 return flask.jsonify({'status': 'success'}),200
             case 'save_model':
