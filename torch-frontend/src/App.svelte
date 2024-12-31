@@ -197,6 +197,24 @@ async function fetchAllDataAndAddToChart() {
   }
   }
 
+  async function doAction(actionType:string){
+    try {
+      const response = await fetch('http://127.0.0.1:8080/do_action', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({action: actionType}),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    }
+    catch (error) {
+      console.error('Error updating variable:', error);
+    }
+  }
+
   function updateSelectList(selectListData: Object[]) {
     variableSelectListData = selectListData;
   }
@@ -308,7 +326,11 @@ onDestroy(() => {
       chartType="line"
     />
   </section>
-
+  <section class="action-section">
+    {#each ["save_model","toggle_training"] as action}
+      <button style="margin-top: 20px;" on:click={() => doAction(action)}>{action.replace("_"," ")}</button>
+    {/each}
+  </section>
   <section class="form-section">
     <h2 style="color:orange">Change Hyperparameters</h2>
 
@@ -522,4 +544,15 @@ onDestroy(() => {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     background-color: #fff;
   } */
+
+  .action-section {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap:20px;
+  }
+  .action-section button{
+    text-transform: capitalize;
+  }
 </style>
