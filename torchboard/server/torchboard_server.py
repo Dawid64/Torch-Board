@@ -115,9 +115,6 @@ class TorchBoardServer():
             
         name,value = data['name'],data['value']
         
-        # if not name in self.variable_state:
-        #     return flask.jsonify({'status': 'error', 'message': f'Variable {name} not found'}),404
-        
         self.board.optim_operator.update_parameters(name, value)
         
         return flask.jsonify({'status': 'success'}),200

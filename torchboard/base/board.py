@@ -7,6 +7,7 @@ from torchboard.operations.optim import OptimizerOperator
 from torchboard.server.torchboard_server import TorchBoardServer
 from torch.nn.modules.loss import _Loss
 
+from threading import Event
 
 
 # TODO: Add documentation
@@ -24,7 +25,8 @@ class Board:
         self.server = TorchBoardServer(board=self)
         self.server.start()
         
-        self.do_training = True
+        self.do_training = Event()
+        self.toggle_training() #Toggle event to true
 
     def update(self, **kwargs):
         """ Update arguments """
@@ -37,17 +39,14 @@ class Board:
         if len(listener_changes) > 0:
             self.history.update(listener_changes)
         
-        while not self.do_training:
-            pass #Is this the best way to do this?        
+        #Block execution until training is unpaused
+        self.do_training.wait() #Resource friendly wait
         
-    def update_variable(self, name: str, value: Any):
-        if name.startswith('optim_'):
-            self.optim_operator.update_parameters(name[6:], value)
-        self.server.update_changeable_value(name, value)
-        #TODO update other variables
-    
     def toggle_training(self):
-        self.do_training = not self.do_training
+        if self.do_training.is_set():
+            self.do_training.clear()
+        else:
+            self.do_training.set()
         
     def save_model(self):
         torch.save(self.model, 'model.pth')
