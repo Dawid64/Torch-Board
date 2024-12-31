@@ -3,8 +3,6 @@ from flask_cors import CORS, cross_origin
 from werkzeug.serving import make_server
 import secrets
 
-import webbrowser
-
 from threading import Thread
 
 import os
@@ -76,7 +74,7 @@ class TorchBoardServer():
         self.server.daemon_threads = True
     
     
-    def start(self, start_browser=False) -> None:
+    def start(self) -> None:
         if self.__flask_process:
             return
         self.__flask_process = Thread(target=self.server.serve_forever)
@@ -84,12 +82,15 @@ class TorchBoardServer():
         self.__flask_process.start()
         
         print(f'Started TorchBoard server at http://{self.host}:{self.port}')
-        if start_browser:
-            webbrowser.open(f'http://{self.host}:{self.port}') #Force open browser to dashboard
     
     def stop(self) -> None:
+        if not self.__flask_process:
+            return
         self.__flask_process.join()
         self.__flask_process = None
+    
+    def __del__(self):
+        self.stop()
     
     @cross_origin()
     def __get_changes_session(self) -> flask.Response:

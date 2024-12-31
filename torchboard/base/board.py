@@ -85,6 +85,3 @@ class Board:
         else:
             raise NotImplementedError(
                 f'There is currently no support for: {argument.__class__}')
-            
-    def __del__(self):
-        self.server.stop()
