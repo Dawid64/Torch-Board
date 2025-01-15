@@ -21,6 +21,8 @@
   "dependencies": {
     "chart.js": "^4.4.7",
     "chartjs-plugin-zoom": "^2.2.0",
-    "d3": "^7.9.0"
+    "d3": "^7.9.0",
+    "dotenv": "^16.4.7",
+    "socket.io-client": "^4.8.1"
   }
 }

@@ -12,6 +12,8 @@
 
     import { chartOptions, colorPalette } from "./chartConfig/chartConfig";
 
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
     let usedColors = new Set<string>(); // Zestaw użytych kolorów
 
     //    // Początkowe dane
@@ -120,7 +122,7 @@
 
     async function fetchAllDataAndAddToChart() {
         try {
-            const response = await fetch("http://127.0.0.1:8080/get_history"); // Zmień URL na swój endpoint
+            const response = await fetch(`${BACKEND_URL}/get_history`); // Zmień URL na swój endpoint
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -135,7 +137,7 @@
     // Funkcja obsługująca request do backendu
     async function fetchNewDataAndAddToChart() {
         try {
-            const response = await fetch("http://127.0.0.1:8080/get_changes"); // Zmień URL na swój endpoint
+            const response = await fetch(`${BACKEND_URL}/get_changes`); // Zmień URL na swój endpoint
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -159,7 +161,7 @@
 
     async function fetchVariablesAndSetSelectList() {
         try {
-            const response = await fetch("http://127.0.0.1:8080/get_variables");
+            const response = await fetch(`${BACKEND_URL}/get_variables`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -173,7 +175,7 @@
 
     async function updateVariableFromSelectList(variableFromSelectList: { [key: string]: any }) {
         try {
-            const response = await fetch("http://127.0.0.1:8080/update_variable", {
+            const response = await fetch(`${BACKEND_URL}/update_variable`, {
                 method: "PUT", // Ustawienie metody HTTP na PUT
                 headers: {
                     "Content-Type": "application/json", // Określenie typu danych w body
@@ -194,7 +196,7 @@
 
     async function doAction(actionType: string) {
         try {
-            const response = await fetch("http://127.0.0.1:8080/do_action", {
+            const response = await fetch(`${BACKEND_URL}/do_action`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
