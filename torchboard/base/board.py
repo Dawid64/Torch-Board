@@ -4,7 +4,7 @@ from torch.nn import Module
 from torch.optim import Optimizer
 from .utils import _SUPPORTED, History, overwrite_criterion_loss_update
 from torchboard.operations.optim import OptimizerOperator
-from torchboard.server.torchboard_server import TorchBoardServer
+from torchboard.server import SocketServer
 from torch.nn.modules.loss import _Loss
 
 from threading import Event
@@ -22,7 +22,7 @@ class Board:
         self.history: History = History()
         self.optim_operator: Optional[OptimizerOperator]
         
-        self.server = TorchBoardServer(board=self)
+        self.server = SocketServer(board=self)
         self.server.start()
         
         self.do_training = Event()
@@ -32,12 +32,18 @@ class Board:
         """ Update arguments """
 
         parsed = self._argument_parser(kwargs)
+        changes_set = set(parsed.values())
+        if 'Optimizer' in changes_set:
+            #Update clients on optimizer variables
+            self.server.emit_optimizer_variables(self.optim_operator)
         
         listener_changes = {arg_name: float(kwargs[arg_name])
                    for arg_name, arg_type in parsed.items() if arg_type in ['Value']}
         
         if len(listener_changes) > 0:
             self.history.update(listener_changes)
+            #Update clients on variable changes
+            self.server.emit_variable_changes(self.history.get_since_last_change())
         
         #Block execution until training is unpaused
         self.do_training.wait() #Resource friendly wait
