@@ -64,6 +64,14 @@ class SocketServer:
             self.app, resources={r"/*": {"origins": "*"}}
         )  # TODO: Change origins to specific domain
 
+        @self.app.route('/')
+        def index():
+            return flask.send_from_directory(self.static_path, 'index.html')
+
+        @self.app.route('/<path:path>')
+        def static_proxy(path):
+            return flask.send_from_directory(self.static_path, path)
+        
         self.socketio = SocketIO(self.app, cors_allowed_origins="*")
         self.socketio.init_app(self.app)
 
