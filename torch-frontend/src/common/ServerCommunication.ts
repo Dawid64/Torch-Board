@@ -1,4 +1,4 @@
-import {io,Socket} from "socket.io-client";
+import {io, Socket} from "socket.io-client";
 import StoreValue from "./StoreValue";
 
 //Helper function. Sets key and triggers reactivity
@@ -47,24 +47,8 @@ class SocketHandler {
         this.socket.disconnect();
     }
 
-    public onConnect(callback: () => void) {
-        this.socket.on("connect", callback);
-    }
-
-    public onDisconnect(callback: () => void) {
-        this.socket.on("disconnect", callback);
-    }
-
-    public onChartValueUpdate(callback: (variable:{key:string,values:number[]}) => void) {
-        this.socket.on("chartValueUpdate", callback);
-    }
-
-    public onBoardValueUpdate(callback: (data:{key:string, values: number | boolean | string}) => void) {
-        this.socket.on("boardValueUpdate", callback);
-    }
-
-    public onGetOptimizerVariables(callback: (variables:[{name:string,value: number | boolean | number[],type:OptimizerVariableType}]) => void) {
-        this.socket.on("getOptimizerVariables", callback);
+    public registerCallback(event: keyof ServerToClientMessage | "connect" | "disconnect", callback: (...args: any[]) => void) {
+        this.socket.on(event,callback);
     }
 
     public emitOptimizerValueUpdate(key:string,value: number) {
@@ -88,21 +72,23 @@ export class ServerState{
         this.socketHandler = new SocketHandler(connectionUrl);
         setMapKey(this.__boardValues, "connected", false);
 
-        this.socketHandler.onConnect(() => {
+        this.socketHandler.registerCallback("connect",() => {
             setMapKey(this.__boardValues, "connected", true);
-        });
-        this.socketHandler.onDisconnect(() => {
+        })
+        this.socketHandler.registerCallback("disconnect",() => {
             setMapKey(this.__boardValues, "connected", false);
+            setMapKey(this.__boardValues, "training", false);
         });
 
-        this.socketHandler.onChartValueUpdate((variable:{key:string,values:number[]}) => {
+        this.socketHandler.registerCallback("chartValueUpdate",(variable:{key:string,values:number[]}) => {
             this.onChartValueUpdate(variable.key,variable.values);
         });
 
-        this.socketHandler.onBoardValueUpdate((data:{key:string, values: number | boolean | string}) => {
+        this.socketHandler.registerCallback("boardValueUpdate",(data:{key:string, values: number | boolean | string}) => {
             this.onBoardValueUpdate(data.key,data.values);
         });
-        this.socketHandler.onGetOptimizerVariables((variables) => {
+
+        this.socketHandler.registerCallback("getOptimizerVariables",(variables) => {
             this.onGetOptimizerVariables(variables);
         });
 

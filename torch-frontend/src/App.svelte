@@ -10,9 +10,6 @@
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
     let serverState = new ServerState(BACKEND_URL);
-
-
-    let usedColors = new Set<string>(); // Zestaw użytych kolorów
     
 
     async function doAction(actionType: string) {
@@ -39,20 +36,47 @@
         unsubscribeBoardVars();
         unsubscribeOptimizerVars();
     });
+
+    function makeDatasets(chartVars:Map<string,number[]>){
+        let datasets:any[] = [];
+
+        let usedColors = new Set<string>(); // Zestaw użytych kolorów
+        chartVars.forEach((value, key) => {
+            if (key !== "loss") {
+                const color = colorPalette[Array.from(usedColors).length % colorPalette.length];
+                usedColors.add(color);
+                datasets.push({
+                    label: key,
+                    data: value,
+                    borderColor: colorPalette.find((color) => !usedColors.has(color)) || "gray",
+                    backgroundColor: "rgba(0, 0, 255, 0.1)", // Stała wartość
+                    fill: false, // Stała wartość
+                });
+            }
+        });
+        return datasets;
+    }
+
 </script>
 
 <header>
     <h1 style="color:orange">Torch-Board</h1>
     <div>
-    <p>{boardVars.get("connected")? "Connected":"Waiting for server connection..."}</p>
-    <p>{boardVars.get("training")? "Training in progress":"Training paused..."}</p>
-    </div>  
+        {#if boardVars.get("connected")}
+            <p style="color:green">Connected</p>
+        {:else}
+            <p style="color:red">Waiting for server connection...</p>
+        {/if}
+        {#if boardVars.get("training")}
+            <p style="color:green">Training in progress</p>
+        {:else}
+            <p style="color:yellow">Training paused...</p>
+        {/if}
+    </div>
     <section class="action-section">
         <h2 style="color:orange">Actions</h2>
         {#each ["save_model", "toggle_training"] as action}
-            <button
-                on:click={() => doAction(action)}>{action.replace("_", " ")}</button
-            >
+            <button on:click={() => doAction(action)}>{action.replace("_", " ")}</button>
         {/each}
     </section>
 </header>
@@ -65,15 +89,7 @@
                 <ChartComponent
                     chartData={{
                         labels: new Array(chartVars.get("acc")?.length ?? 0).fill(null).map((_, i) => i),
-                        datasets: [
-                            {
-                                label: "acc",
-                                data: chartVars.get("acc"),
-                                borderColor: colorPalette.find((color) => !usedColors.has(color)) || "gray",
-                                backgroundColor: "rgba(0, 0, 255, 0.1)", // Stała wartość
-                                fill: false, // Stała wartość
-                            },
-                        ],
+                        datasets: makeDatasets(chartVars),
                     }}
                     {chartOptions}
                     chartType="line"
@@ -82,7 +98,7 @@
         </section>
         <div class="list-vertical flex-space-filling">
             <section class="form-section list-vertical">
-                <OptimizerVariablesEditor optimizerVars={optimizerVars} onSubmitChange={(k,v) => serverState.updateOptimizerValue(k,v)} />
+                <OptimizerVariablesEditor {optimizerVars} onSubmitChange={(k, v) => serverState.updateOptimizerValue(k, v)} />
             </section>
         </div>
     </div>
@@ -97,6 +113,8 @@
         justify-content: flex-start;
         align-items: center;
         gap: 20px;
+
+        border-bottom: 2px solid orange;
     }
     main {
         flex-grow: 1;
@@ -114,8 +132,6 @@
 
         overflow-y: scroll;
     }
-
-    
 
     /* Styl dla przycisków */
     button {
