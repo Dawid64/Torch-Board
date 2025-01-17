@@ -95,26 +95,26 @@ class SocketServer:
         self.__flask_process.join()
         self.__flask_process = None
 
-    def __emit_to_channel(self, channel: str, data: Any, broadcast: bool = True,room=None):
+    def __emit_to_channel(self, channel: str, data: Any,room=None):
         with self.app.app_context():
-            if broadcast:
-                self.socketio.emit(channel, data, broadcast=True)
+            if room is None:
+                self.socketio.emit(channel, data)
             else:
                 self.socketio.emit(channel, data, to=room)
     
-    def emit_optimizer_variables(self, optim_operator, broadcast=True, room=None):
+    def emit_optimizer_variables(self, optim_operator, room=None):
         variables = [
             {"name": key, "value": value, "type": type_mapping(value)}
             for key, value in optim_operator.get_current_parameters().items()
         ]
-        self.__emit_to_channel("getOptimizerVariables", variables, broadcast=broadcast, room=room)
+        self.__emit_to_channel("getOptimizerVariables", variables, room=room)
 
-    def emit_variable_changes(self, changes:dict[str,list[Any]], broadcast=True, room=None):
+    def emit_variable_changes(self, changes:dict[str,list[Any]], room=None):
         for key, value in changes.items():
-            self.__emit_to_channel("chartValueUpdate", {"key": key, "values": value}, broadcast=broadcast, room=room)
+            self.__emit_to_channel("chartValueUpdate", {"key": key, "values": value}, room=room)
     
-    def emit_board_variable_change(self, key:str, value:Any, broadcast=True, room=None):
-        self.__emit_to_channel("boardValueUpdate", {"key": key, "values": value}, broadcast=broadcast, room=room)
+    def emit_board_variable_change(self, key:str, value:Any, room=None):
+        self.__emit_to_channel("boardValueUpdate", {"key": key, "values": value}, room=room)
             
     def __config_socket(self):
         # This looks cursed ._.
@@ -124,12 +124,12 @@ class SocketServer:
             #print("Client connected", flask.request.sid)
             user_room = flask.request.sid
             try:
-                self.emit_optimizer_variables(self.board.optim_operator, broadcast=False, room=user_room)
+                self.emit_optimizer_variables(self.board.optim_operator, room=user_room)
             except AttributeError:
                 pass
             #Send all history data only to newly connected client
-            self.emit_variable_changes(self.board.history.get_all(), broadcast=False, room=user_room)
-            self.emit_board_variable_change("training", self.board.do_training.is_set(), broadcast=False, room=user_room)
+            self.emit_variable_changes(self.board.history.get_all(), room=user_room)
+            self.emit_board_variable_change("training", self.board.do_training.is_set(), room=user_room)
 
         @self.socketio.on("disconnect")
         def disconnect():
