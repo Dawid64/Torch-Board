@@ -9,6 +9,7 @@ torchvision
 # Backend
 flask
 flask_cors
+flask_socketio
 
 # Library-related
 pytest
