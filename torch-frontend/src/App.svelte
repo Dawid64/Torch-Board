@@ -10,10 +10,9 @@
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
     let serverState = new ServerState(BACKEND_URL);
-    
 
     async function doAction(actionType: string) {
-        serverState.triggerAction(actionType,null);
+        serverState.triggerAction(actionType, null);
     }
     //Subscribe to server state values
     let chartVars = serverState.chartValues.value;
@@ -37,8 +36,8 @@
         unsubscribeOptimizerVars();
     });
 
-    function makeDatasets(chartVars:Map<string,number[]>){
-        let datasets:any[] = [];
+    function makeDatasets(chartVars: Map<string, number[]>) {
+        let datasets: any[] = [];
 
         let usedColors = new Set<string>(); // Zestaw użytych kolorów
         chartVars.forEach((value, key) => {
@@ -57,6 +56,8 @@
         return datasets;
     }
 
+    $: datasets = makeDatasets(chartVars);
+    $: labels_length = datasets.map((dataset) => dataset.data.length).reduce((a, b) => Math.max(a, b), 0);
 </script>
 
 <header>
@@ -85,16 +86,14 @@
         <section class="chart-section">
             <!-- Pierwszy wykres -->
             <h2 style="color:orange">Chart</h2>
-            {#if chartVars.get("acc")}
-                <ChartComponent
-                    chartData={{
-                        labels: new Array(chartVars.get("acc")?.length ?? 0).fill(null).map((_, i) => i),
-                        datasets: makeDatasets(chartVars),
-                    }}
-                    {chartOptions}
-                    chartType="line"
-                />
-            {/if}
+            <ChartComponent
+                chartData={{
+                    labels: new Array(labels_length).fill(null).map((_, i) => i),
+                    datasets: datasets,
+                }}
+                {chartOptions}
+                chartType="line"
+            />
         </section>
         <div class="list-vertical flex-space-filling">
             <section class="form-section list-vertical">
