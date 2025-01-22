@@ -56,7 +56,7 @@ def train(model, x_train, y_train, x_val, y_val, epochs=100, lr=0.01):
         print(f"Epoch {epoch} loss: {loss.item()} accuracy: {acc}", end="\t")
         board.update(acc=acc, acc2=acc - 0.2)
         validate(model, x_val, y_val, criterion)
-    sleep(10)
+    sleep(2)
 
 
 @torch.no_grad()
@@ -81,4 +81,4 @@ if __name__ == "__main__":
 
     model = Classifier(input_features=4, output_classes=3)
 
-    train(model, X_train, y_train, X_val, y_val, epochs=50, lr=0.01)
+    train(model, X_train, y_train, X_val, y_val, epochs=200, lr=0.01)

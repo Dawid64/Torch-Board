@@ -1,3 +1,4 @@
+import time
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -65,7 +66,7 @@ def train(model, train_loader, val_loader, epochs=100, lr=0.01):
             loss = criterion(y_pred, y)
             loss.backward()
             optimizer.step()
-            
+            time.sleep(0.1)
             print(f"Epoch {epoch} loss: {loss.item()}")
         for batch in val_loader:
             X, y = batch
