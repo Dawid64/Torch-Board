@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "torchboard"
-version = "0.1.1"
+version = "0.1.2"
 description = "Python dashboard application adding interactivity into your pytorch model"
 readme = "README.md"
 repository = "https://github.com/Dawid64/Torch-Board"
