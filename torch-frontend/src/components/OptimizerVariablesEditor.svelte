@@ -129,6 +129,10 @@
         max-width: 100%;
     }
 
+    input[type="checkbox"] {
+        margin-top: 10px;
+        accent-color: #ff8833;
+    }
     input[type="number"] {
         padding: 8px;
         font-size: 16px;

@@ -41,17 +41,15 @@
 
         let usedColors = new Set<string>(); // Zestaw użytych kolorów
         chartVars.forEach((value, key) => {
-            if (key !== "loss") {
-                const color = colorPalette[Array.from(usedColors).length % colorPalette.length];
-                usedColors.add(color);
-                datasets.push({
-                    label: key,
-                    data: value,
-                    borderColor: colorPalette.find((color) => !usedColors.has(color)) || "gray",
-                    backgroundColor: "rgba(0, 0, 255, 0.1)", // Stała wartość
-                    fill: false, // Stała wartość
-                });
-            }
+            const color = colorPalette[Array.from(usedColors).length % colorPalette.length];
+            usedColors.add(color);
+            datasets.push({
+                label: key,
+                data: value,
+                borderColor: colorPalette.find((color) => !usedColors.has(color)) || "gray",
+                backgroundColor: "rgba(0, 0, 0, 0.1)", 
+                fill: false,
+            });
         });
         return datasets;
     }
@@ -114,7 +112,7 @@
         color: #ff8833;
     }
     .header-contents {
-        margin: 0  20px;
+        margin: 0 20px;
 
         max-height: 100px;
 
