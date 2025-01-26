@@ -57,7 +57,7 @@
 </script>
 
 <div class="optimizer-variables-editor">
-    <h2 style="color:orange">Hyperparameters</h2>
+    <h2>Hyperparameters</h2>
 
     <!-- Select lista -->
     <label for="select">Select an element:</label>
@@ -166,6 +166,10 @@
         gap: 10px;
         height: 100%;
         width: 100%;
+    }
+
+    .optimizer-variables-editor h2 {
+        color:#ff8833;
     }
     .dynamic-components {
         display: flex;
