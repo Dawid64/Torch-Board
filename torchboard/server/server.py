@@ -5,7 +5,7 @@ from flask_socketio import SocketIO, send, emit
 from werkzeug.serving import make_server
 import secrets
 
-from threading import Thread
+from threading import Thread, Timer
 
 import os
 
@@ -43,6 +43,7 @@ class SocketServer:
         name: str = "TorchBoard",
         static_path: str = "torchboard/dist",
         board: Any = None,
+        rate_limit_ms: int = 250,
     ) -> None:
         static_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "dist")
         from torchboard.base.board import Board
@@ -54,6 +55,9 @@ class SocketServer:
         self.board: Board = board
         if self.board is None:
             raise ValueError("Board is not provided")
+        
+        self.rate_limit_ms = rate_limit_ms
+        self.send_timer = None
 
         self.app = flask.Flask(name)
         self.app.config["SECRET_KEY"] = secrets.token_urlsafe(16)
@@ -109,9 +113,28 @@ class SocketServer:
         ]
         self.__emit_to_channel("getOptimizerVariables", variables, room=room)
 
-    def emit_variable_changes(self, changes:dict[str,list[Any]], room=None):
-        for key, value in changes.items():
+    def emit_variable_values(self, history:dict[str,list[Any]], room=None):
+        """
+        Emit variable histories to the client
+        """
+        for key, value in history.items():
             self.__emit_to_channel("chartValueUpdate", {"key": key, "values": value}, room=room)
+    
+    def __emit_variable_changes(self, room=None):
+        self.emit_variable_values(self.board.history.get_since_last_change(), room=room)
+        self.send_timer = None
+            
+    def emit_variable_changes(self, room=None):
+        """
+        Emit chart variable changes to the client
+        This function is rate limited to prevent spamming the client with socket updates in case of high frequency updates
+        """
+        if self.send_timer is not None:
+            return
+    
+        
+        self.send_timer = Timer(self.rate_limit_ms/1000, self.__emit_variable_changes, args=(room,))
+        self.send_timer.start()
     
     def emit_board_variable_change(self, key:str, value:Any, room=None):
         self.__emit_to_channel("boardValueUpdate", {"key": key, "values": value}, room=room)
@@ -128,7 +151,7 @@ class SocketServer:
             except AttributeError:
                 pass
             #Send all history data only to newly connected client
-            self.emit_variable_changes(self.board.history.get_all(), room=user_room)
+            self.emit_variable_values(self.board.history.get_all(), room=user_room)
             self.emit_board_variable_change("training", self.board.do_training.is_set(), room=user_room)
 
         @self.socketio.on("disconnect")

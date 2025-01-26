@@ -22,7 +22,7 @@
         chart?.destroy();
       };
     });
-  
+
     // Watch for changes to props and update the chart dynamically
     $: if (chart && chartData) {
       chart.data = chartData;

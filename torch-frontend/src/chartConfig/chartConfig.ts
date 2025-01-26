@@ -3,56 +3,57 @@
 export const colorPalette = [
   'orange', 'teal','green', 'blue', 'red', 'purple', 'cyan', 'magenta', 'yellow', 'brown'
 ];
-  
-  export const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        display: true,
-      },
-      title: {
-        display: true,
-        text: '',
-      },
-      tooltip: {
-        enabled: true,
-        mode: 'index',
-        intersect: false,
-        backgroundColor: 'rgba(0,0,0,0.8)',
-        titleColor: '#fff',
-        bodyColor: '#ddd',
-        callbacks: {
-          label: (context: any) => `Wartość: ${context.raw}`,
-        },
-      },
+
+// 
+const decimation = {
+  enabled: true,
+  algorithm: 'min-max',
+};
+
+export const chartOptions = {
+  responsive: true,
+  plugins: {
+    decimation: decimation,
+    legend: {
+      display: true,
+    },
+    title: {
+      display: false,
+    },
+    tooltip: {
+      enabled: true,
+      mode: 'index',
+      intersect: false,
+      backgroundColor: 'rgba(0,0,0,0.8)',
+      titleColor: '#fff',
+      bodyColor: '#ddd',
+    },
+    parsing: false,
+    zoom: {
       zoom: {
-        zoom: {
-          wheel: {
-            enabled: true,
-          },
-          drag: {
-            enabled: true,
-          },
-          mode: 'xy',
-        },
-        pan: {
+        wheel: {
           enabled: true,
-          mode: 'xy',
         },
+        drag: {
+          enabled: true,
+        },
+        mode: 'xy',
+      },
+      pan: {
+        enabled: true,
+        mode: 'xy',
       },
     },
-    animation: {
-      duration: 0,
+  },
+  animation:false,
+  elements: {
+    line: {
+      tension: 0.1,
+      borderWidth: 2,
     },
-    elements: {
-      line: {
-        tension: 0.1,
-        borderWidth: 2,
-      },
-      point: {
-        radius: 1,
-        hoverRadius: 1,
-      },
+    point: {
+      radius: 0,
     },
-  };
+  },
+};
   
