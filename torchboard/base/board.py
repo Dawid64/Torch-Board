@@ -43,7 +43,7 @@ class Board:
         if len(listener_changes) > 0:
             self.history.update(listener_changes)
             #Update clients on variable changes
-            self.server.emit_variable_changes(self.history.get_since_last_change())
+            self.server.emit_variable_changes()
         
         #Block execution until training is unpaused
         self.do_training.wait() #Resource friendly wait
