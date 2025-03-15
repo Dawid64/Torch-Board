@@ -7,7 +7,10 @@
 
     import { chartOptions, colorPalette } from "./chartConfig/chartConfig";
 
-    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+    const BACKEND_URL =
+        import.meta.env.VITE_BACKEND_URL || window.location.origin;
+
+    console.log(BACKEND_URL, window.location.origin);
 
     let serverState = new ServerState(BACKEND_URL);
 
@@ -26,9 +29,11 @@
     });
 
     let optimizerVars = serverState.optimizerVariables.value;
-    const unsubscribeOptimizerVars = serverState.optimizerVariables.subscribe((value) => {
-        optimizerVars = value;
-    });
+    const unsubscribeOptimizerVars = serverState.optimizerVariables.subscribe(
+        (value) => {
+            optimizerVars = value;
+        }
+    );
 
     onDestroy(() => {
         unsubscribeChartVars();
@@ -41,13 +46,18 @@
 
         let usedColors = new Set<string>(); // Zestaw użytych kolorów
         chartVars.forEach((value, key) => {
-            const color = colorPalette[Array.from(usedColors).length % colorPalette.length];
+            const color =
+                colorPalette[
+                    Array.from(usedColors).length % colorPalette.length
+                ];
             usedColors.add(color);
             datasets.push({
                 label: key,
                 data: value,
-                borderColor: colorPalette.find((color) => !usedColors.has(color)) || "gray",
-                backgroundColor: "rgba(0, 0, 0, 0.1)", 
+                borderColor:
+                    colorPalette.find((color) => !usedColors.has(color)) ||
+                    "gray",
+                backgroundColor: "rgba(0, 0, 0, 0.1)",
                 fill: false,
             });
         });
@@ -55,7 +65,9 @@
     }
 
     $: datasets = makeDatasets(chartVars);
-    $: labels_length = datasets.map((dataset) => dataset.data.length).reduce((a, b) => Math.max(a, b), 0);
+    $: labels_length = datasets
+        .map((dataset) => dataset.data.length)
+        .reduce((a, b) => Math.max(a, b), 0);
 </script>
 
 <header>
@@ -76,7 +88,9 @@
         <section class="action-section">
             <h2>Actions</h2>
             {#each ["save_model", "toggle_training"] as action}
-                <button on:click={() => doAction(action)}>{action.replace("_", " ")}</button>
+                <button on:click={() => doAction(action)}
+                    >{action.replace("_", " ")}</button
+                >
             {/each}
         </section>
     </div>
@@ -87,7 +101,9 @@
             <!-- Pierwszy wykres -->
             <ChartComponent
                 chartData={{
-                    labels: new Array(labels_length).fill(null).map((_, i) => i),
+                    labels: new Array(labels_length)
+                        .fill(null)
+                        .map((_, i) => i),
                     datasets: datasets,
                 }}
                 {chartOptions}
@@ -96,7 +112,11 @@
         </section>
         <div class="list-vertical flex-space-filling">
             <section class="form-section list-vertical">
-                <OptimizerVariablesEditor {optimizerVars} onSubmitChange={(k, v) => serverState.updateOptimizerValue(k, v)} />
+                <OptimizerVariablesEditor
+                    {optimizerVars}
+                    onSubmitChange={(k, v) =>
+                        serverState.updateOptimizerValue(k, v)}
+                />
             </section>
         </div>
     </div>
